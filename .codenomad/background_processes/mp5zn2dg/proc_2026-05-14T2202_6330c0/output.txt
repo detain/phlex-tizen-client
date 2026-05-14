@@ -1,1 +1,0 @@
-HEAD is now at e33e918 Step 1.2: Implement database layer with connection pool and schema (#2)

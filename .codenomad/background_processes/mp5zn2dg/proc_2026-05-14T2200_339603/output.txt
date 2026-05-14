@@ -1,5 +1,0 @@
-PHPUnit 10.5.63 by Sebastian Bergmann and contributors.
-
-Runtime:       PHP 8.3.6
-
-..PHP Fatal error:  Declaration of Workerman\MySQL\Connection@anonymous::query($sql, $bindings = []) must be compatible with Workerman\MySQL\Connection::query($query = '', $params = null, $fetchmode = PDO::FETCH_ASSOC) in /home/sites/phlex/tests/unit/Common/Database/QueryBuilderTest.php on line 54

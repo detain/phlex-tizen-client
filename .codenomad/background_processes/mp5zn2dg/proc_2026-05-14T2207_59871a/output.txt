@@ -1,8 +1,0 @@
-Loading composer repositories with package information
-Updating dependencies
-Your requirements could not be resolved to an installable set of packages.
-
-  Problem 1
-    - Root composer.json requires workerman/mysql ^8.0, found workerman/mysql[dev-master, v1.0, ..., v1.0.9] but it does not match the constraint.
-
-Use the option --with-all-dependencies (-W) to allow upgrades, downgrades and removals for packages currently locked to specific versions.

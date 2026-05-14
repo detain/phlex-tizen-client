@@ -1,7 +1,0 @@
-remote: 
-remote: Create a pull request for 'step-1.3-logging' on GitHub by visiting:        
-remote:      https://github.com/detain/phlex/pull/new/step-1.3-logging        
-remote: 
-To github.com:detain/phlex.git
- * [new branch]      step-1.3-logging -> step-1.3-logging
-branch 'step-1.3-logging' set up to track 'origin/step-1.3-logging'.

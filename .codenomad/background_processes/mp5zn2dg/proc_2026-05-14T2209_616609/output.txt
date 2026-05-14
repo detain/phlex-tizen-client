@@ -1,8 +1,0 @@
-Already on 'master'
-M	vendor/bin/.phpunit.result.cache
-M	vendor/composer/autoload_classmap.php
-M	vendor/composer/autoload_static.php
-Your branch is up to date with 'origin/master'.
-error: cannot lock ref 'refs/remotes/origin/master': is at 4968bd778e589a1f3186858f527b2be36cd4c922 but expected e33e918137ced1d75b08bd6efaea38568efbab21
-From github.com:detain/phlex
- ! e33e918..4968bd7  master     -> origin/master  (unable to update local ref)

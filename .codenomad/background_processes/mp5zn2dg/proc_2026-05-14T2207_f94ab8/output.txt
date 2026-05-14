@@ -1,6 +1,0 @@
-Generating optimized autoload files
-Class Phlex\Tests\Unit\Common\Database\QueryBuilderTest located in ./tests/unit/Common/Database/QueryBuilderTest.php does not comply with psr-4 autoloading standard (rule: Phlex\Tests\ => ./tests). Skipping.
-Class Phlex\Tests\Unit\Common\Database\ConnectionPoolTest located in ./tests/unit/Common/Database/ConnectionPoolTest.php does not comply with psr-4 autoloading standard (rule: Phlex\Tests\ => ./tests). Skipping.
-Class Phlex\Tests\Unit\Common\Logger\AuditLoggerTest located in ./tests/unit/Common/Logger/AuditLoggerTest.php does not comply with psr-4 autoloading standard (rule: Phlex\Tests\ => ./tests). Skipping.
-Class Phlex\Tests\Unit\Common\Logger\StructuredLoggerTest located in ./tests/unit/Common/Logger/StructuredLoggerTest.php does not comply with psr-4 autoloading standard (rule: Phlex\Tests\ => ./tests). Skipping.
-Generated optimized autoload files containing 1928 classes

@@ -1,8 +1,0 @@
-[step-1.2-database-layer a2269b8] Step 1.2: Implement database layer with connection pool and schema
- 6 files changed, 466 insertions(+)
- create mode 100644 migrations/001_initial_schema.sql
- create mode 100644 scripts/run-migrations.php
- create mode 100644 src/Common/Database/ConnectionPool.php
- create mode 100644 src/Common/Database/QueryBuilder.php
- create mode 100644 tests/unit/Common/Database/ConnectionPoolTest.php
- create mode 100644 tests/unit/Common/Database/QueryBuilderTest.php

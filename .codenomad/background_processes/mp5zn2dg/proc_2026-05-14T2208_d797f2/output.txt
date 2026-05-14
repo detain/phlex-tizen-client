@@ -1,8 +1,0 @@
-[step-1.3-logging 9e641fc] Step 1.3: Implement structured logging with Monolog
- 6 files changed, 487 insertions(+)
- create mode 100644 src/Common/Logger/AuditLogger.php
- create mode 100644 src/Common/Logger/LogChannels.php
- create mode 100644 src/Common/Logger/LoggerFactory.php
- create mode 100644 src/Common/Logger/StructuredLogger.php
- create mode 100644 tests/unit/Common/Logger/AuditLoggerTest.php
- create mode 100644 tests/unit/Common/Logger/StructuredLoggerTest.php

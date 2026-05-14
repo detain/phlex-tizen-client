@@ -1,7 +1,0 @@
-Installing dependencies from lock file (including require-dev)
-Verifying lock file contents can be installed on current platform.
-Warning: The lock file is not up to date with the latest changes in composer.json. You may be getting outdated dependencies. It is recommended that you run `composer update` or `composer update <package name>`.
-- Required package "workerman/mysql" is in the lock file as "v1.0.9" but that does not satisfy your constraint "^8.0".
-This usually happens when composer files are incorrectly merged or the composer.json file is manually edited.
-Read more about correctly resolving merge conflicts https://getcomposer.org/doc/articles/resolving-merge-conflicts.md
-and prefer using the "require" command over editing the composer.json file directly https://getcomposer.org/doc/03-cli.md#require-r
