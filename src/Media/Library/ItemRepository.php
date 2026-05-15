@@ -213,6 +213,164 @@ class ItemRepository
         return $ids;
     }
 
+    /**
+     * Content rating order (least to most restrictive)
+     */
+    public const RATING_ORDER = [
+        'G' => 1,
+        'PG' => 2,
+        'PG-13' => 3,
+        'R' => 4,
+        'NC-17' => 5,
+        'X' => 6,
+        'UNRATED' => 7,
+    ];
+
+    /**
+     * Get items filtered by allowed content ratings
+     *
+     * @param string $libraryId Library to filter
+     * @param array $allowedRatings Array of allowed rating strings
+     * @param int $limit Max items to return
+     * @param int $offset Pagination offset
+     * @return array Filtered media items
+     */
+    public function getByAllowedRatings(string $libraryId, array $allowedRatings, int $limit = 100, int $offset = 0): array
+    {
+        // Build CASE expression for rating order comparison
+        $ratingCases = [];
+        foreach (self::RATING_ORDER as $rating => $order) {
+            $ratingCases[] = "WHEN JSON_UNQUOTE(JSON_EXTRACT(metadata_json, '$.rating')) = '{$rating}' THEN {$order}";
+        }
+        $ratingOrderSql = 'CASE ' . implode(' ', $ratingCases) . ' ELSE 999 END';
+
+        // Build rating filter
+        $ratingPlaceholders = implode(',', array_fill(0, count($allowedRatings), '?'));
+
+        $results = $this->db->query(
+            "SELECT * FROM media_items
+             WHERE library_id = ?
+               AND (
+                   JSON_UNQUOTE(JSON_EXTRACT(metadata_json, '$.rating')) IN ({$ratingPlaceholders})
+                   OR JSON_EXTRACT(metadata_json, '$.rating') IS NULL
+               )
+             ORDER BY {$ratingOrderSql}, name
+             LIMIT ? OFFSET ?",
+            array_merge([$libraryId], $allowedRatings, [$limit, $offset])
+        );
+
+        return array_map(fn($r) => $this->hydrateItem($r), $results);
+    }
+
+    /**
+     * Get items filtered by a maximum content rating
+     *
+     * @param string $libraryId Library to filter
+     * @param string $maxRating Maximum allowed rating
+     * @param int $limit Max items to return
+     * @param int $offset Pagination offset
+     * @return array Filtered media items
+     */
+    public function getByMaxRating(string $libraryId, string $maxRating, int $limit = 100, int $offset = 0): array
+    {
+        $maxOrder = self::RATING_ORDER[$maxRating] ?? 4;
+
+        // Get all ratings up to and including maxRating
+        $allowedRatings = [];
+        foreach (self::RATING_ORDER as $rating => $order) {
+            if ($order <= $maxOrder) {
+                $allowedRatings[] = $rating;
+            }
+        }
+
+        return $this->getByAllowedRatings($libraryId, $allowedRatings, $limit, $offset);
+    }
+
+    /**
+     * Check if a media item's rating is allowed
+     *
+     * @param string $itemId Media item ID
+     * @param array $allowedRatings Array of allowed rating strings
+     * @return bool True if rating is allowed
+     */
+    public function isRatingAllowed(string $itemId, array $allowedRatings): bool
+    {
+        $item = $this->findById($itemId);
+        if (!$item) {
+            return false;
+        }
+
+        $rating = $item['metadata']['rating'] ?? 'UNRATED';
+
+        if ($rating === 'UNRATED') {
+            return in_array('UNRATED', $allowedRatings);
+        }
+
+        return in_array($rating, $allowedRatings);
+    }
+
+    /**
+     * Get items filtered by allowed genres
+     *
+     * @param string $libraryId Library to filter
+     * @param array $allowedGenres Array of allowed genre strings
+     * @param int $limit Max items to return
+     * @param int $offset Pagination offset
+     * @return array Filtered media items
+     */
+    public function getByAllowedGenres(string $libraryId, array $allowedGenres, int $limit = 100, int $offset = 0): array
+    {
+        if (empty($allowedGenres)) {
+            return $this->getByLibrary($libraryId, $limit, $offset);
+        }
+
+        $genrePlaceholders = implode(',', array_fill(0, count($allowedGenres), '?'));
+
+        // Use JSON_CONTAINS for genre array matching
+        $results = $this->db->query(
+            "SELECT * FROM media_items
+             WHERE library_id = ?
+               AND (
+                   JSON_CONTAINS(metadata_json, ?) > 0
+                   OR JSON_EXTRACT(metadata_json, '$.genres') IS NULL
+               )
+             ORDER BY name
+             LIMIT ? OFFSET ?",
+            array_merge([$libraryId], $allowedGenres, [$limit, $offset])
+        );
+
+        return array_map(fn($r) => $this->hydrateItem($r), $results);
+    }
+
+    /**
+     * Get items excluding blocked genres
+     *
+     * @param string $libraryId Library to filter
+     * @param array $blockedGenres Array of blocked genre strings
+     * @param int $limit Max items to return
+     * @param int $offset Pagination offset
+     * @return array Filtered media items
+     */
+    public function getExcludingGenres(string $libraryId, array $blockedGenres, int $limit = 100, int $offset = 0): array
+    {
+        if (empty($blockedGenres)) {
+            return $this->getByLibrary($libraryId, $limit, $offset);
+        }
+
+        $genrePlaceholders = implode(',', array_fill(0, count($blockedGenres), '?'));
+
+        $results = $this->db->query(
+            "SELECT * FROM media_items
+             WHERE library_id = ?
+               AND JSON_CONTAINS(metadata_json, ?) = 0
+             ORDER BY name
+             LIMIT ? OFFSET ?",
+            array_merge([$libraryId], $blockedGenres, [$limit, $offset])
+        );
+
+        return array_map(fn($r) => $this->hydrateItem($r), $results);
+    }
+
     private function hydrateItem(array $row): array
     {
         $row['metadata_json'] = $row['metadata_json'] ?? '{}';
