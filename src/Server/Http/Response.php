@@ -51,6 +51,12 @@ class Response
         return $this;
     }
 
+    public function body(string $content): self
+    {
+        $this->body = $content;
+        return $this;
+    }
+
     public function xml(string $xml, ?int $statusCode = null): self
     {
         if ($statusCode !== null) {
