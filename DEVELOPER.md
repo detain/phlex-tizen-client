@@ -185,6 +185,284 @@ src/Media/
     └── QualitySelector.php   # Quality profile selection
 ```
 
+---
+
+## Streaming Architecture
+
+The Streaming system provides adaptive bitrate playback via HLS (HTTP Live Streaming) with quality selection based on device capabilities.
+
+### Component Responsibilities
+
+| Component | Responsibility |
+|-----------|----------------|
+| `StreamManager` | Session lifecycle, playback control, state persistence |
+| `StreamState` | Playback state container (position, status, duration) |
+| `HlsStreamer` | HLS playlist generation, segment management |
+| `QualitySelector` | Device profile matching, codec compatibility |
+
+### Streaming Flow
+
+```
+Client Request → StreamManager::createStream()
+    ↓
+QualitySelector::selectQuality() - Determines direct vs transcode
+    ↓
+[Direct Play] → Build direct stream URL
+[Transcode] → Start TranscodeManager job
+    ↓
+StreamState persisted → Client receives playlist URL
+```
+
+### StreamManager (`StreamManager`)
+
+The main entry point for playback session management:
+
+```php
+// Create a stream session
+$state = $streamManager->createStream($mediaItemId, $sessionId, $userId, [
+    'device_profile' => 'mobile-high',
+]);
+
+// Control playback
+$streamManager->play($state->id);
+$streamManager->pause($state->id);
+$streamManager->seek($state->id, $positionTicks);
+$streamManager->stop($state->id);
+
+// Query state
+$state = $streamManager->getStream($streamId);
+$activeCount = $streamManager->getActiveStreamCount();
+```
+
+### StreamState (`StreamState`)
+
+Encapsulates all playback state information:
+
+```php
+// State properties
+$state->id;           // Unique stream identifier
+$state->mediaItemId;  // Media item being played
+$state->positionTicks; // Current position (100-ns ticks)
+$state->durationTicks; // Total duration (100-ns ticks)
+$state->status;       // 'stopped' | 'playing' | 'paused'
+$state->playMethod;  // 'direct' | 'transcode'
+
+// State transitions
+$state->play();   // Start/resume playback
+$state->pause(); // Pause playback
+$state->stop();   // Stop playback
+$state->seek(600000000); // Seek to 60 seconds
+
+// Convenience methods
+$seconds = $state->getPositionSeconds();
+$progress = $state->getProgressPercent(); // 0-100
+```
+
+### HLS Streaming (`HlsStreamer`)
+
+Generates HLS playlists and manages segment files:
+
+```php
+// Generate master playlist (adaptive bitrate)
+$levels = [
+    ['bandwidth' => 5000000, 'width' => 1920, 'height' => 1080, 'name' => '1080p'],
+    ['bandwidth' => 2500000, 'width' => 1280, 'height' => 720, 'name' => '720p'],
+];
+$playlist = $hlsStreamer->generateMasterPlaylist($jobId, $levels);
+
+// Generate variant playlist for quality level
+$segments = [['duration' => 6.0], ['duration' => 6.0]];
+$variant = $hlsStreamer->generateVariantPlaylist($jobId, 0, $segments, 6);
+
+// Segment management
+$hlsStreamer->segmentExists($jobId, 0, 5);  // Check exists
+$hlsStreamer->getSegmentContent($jobId, 0, 5); // Get content
+$hlsStreamer->getSegmentCount($jobId, 0);   // Count segments
+
+// Cleanup
+$hlsStreamer->cleanupJob($jobId);
+```
+
+### Quality Selection (`QualitySelector`)
+
+Matches source capabilities with device profiles:
+
+```php
+$selector = new QualitySelector();
+
+// Device profiles built-in:
+// - generic: 4K max, all codecs
+// - mobile-low: 480p max, H.264 only
+// - mobile-high: 720p max, H.264/H.265
+// - web: 1080p max, H.264/VP9
+// - tv-4k: 4K max, all codecs
+
+$sourceInfo = $ffmpegRunner->probe('/path/to/video.mkv');
+$result = $selector->selectQuality($sourceInfo, 'web');
+
+if ($result['method'] === 'direct') {
+    // Stream without transcoding
+    $container = $result['container'];
+    $videoCodec = $result['video_codec'];
+} else {
+    // Transcode with these parameters
+    $videoCodec = $result['video_codec'];    // e.g., 'libx264'
+    $audioCodec = $result['audio_codec'];   // e.g., 'aac'
+    $resolution = $result['max_resolution']; // e.g., [1920, 1080]
+}
+
+// Custom profiles
+$selector->registerProfile('custom-tv', [
+    'max_bitrate' => 20000000,
+    'max_resolution' => [1920, 1080],
+    'direct_play' => ['h264', 'h265'],
+    'transcode' => ['h264'],
+]);
+```
+
+---
+
+## Transcoding Architecture
+
+The Transcoding system converts media files to optimal formats for streaming using FFmpeg.
+
+### Component Responsibilities
+
+| Component | Responsibility |
+|-----------|----------------|
+| `TranscodeManager` | Job lifecycle, concurrency management, database persistence |
+| `FfmpegRunner` | FFmpeg/FFprobe process execution, command building |
+| `EncodingHelper` | Encoding parameter calculation based on source/profile |
+
+### Transcoding Flow
+
+```
+TranscodeManager::startTranscode()
+    ↓
+Create output directory
+    ↓
+FFmpegRunner::probe() - Analyze source
+    ↓
+EncodingHelper::getEncodingParams() - Calculate optimal settings
+    ↓
+FFmpegRunner::transcode() - Execute FFmpeg
+    ↓
+Update database with status
+    ↓
+Return job ID for tracking
+```
+
+### TranscodeManager (`TranscodeManager`)
+
+Manages transcoding jobs with concurrency limits:
+
+```php
+// Start a transcode job
+$jobId = $transcodeManager->startTranscode($streamState, [
+    'device_profile' => 'mobile-high',
+]);
+
+// Check status
+$status = $transcodeManager->getTranscodeStatus($jobId);
+// ['id' => $jobId, 'status' => 'running', 'output_path' => '...']
+
+// Cancel a job
+$transcodeManager->stopTranscode($jobId);
+
+// Cleanup stale jobs (older than 1 hour)
+$transcodeManager->cleanupStaleJobs(3600);
+
+// Monitor concurrency
+$activeCount = $transcodeManager->getActiveTranscodeCount();
+```
+
+### FfmpegRunner (`FfmpegRunner`)
+
+Low-level FFmpeg process execution:
+
+```php
+$runner = new FfmpegRunner(
+    '/usr/bin/ffmpeg',
+    '/usr/bin/ffprobe',
+    '/var/transcodes'
+);
+
+// Probe for source info
+$info = $runner->probe('/path/to/video.mkv');
+// ['streams' => [...], 'format' => [...]]
+
+// Transcode
+$success = $runner->transcode('/input.mkv', '/output.mp4', [
+    'video_codec' => 'libx264',
+    'audio_codec' => 'aac',
+    'width' => 1920,
+    'height' => 1080,
+    'preset' => 'medium',
+    'crf' => 23,
+]);
+
+// Build command without executing
+$cmd = $runner->buildTranscodeCommand('/input.mkv', '/output.mp4', $params);
+
+// Utilities
+$runner->generateThumbnail('/video.mkv', '/thumb.jpg', 30);
+$runner->extractSubtitle('/video.mkv', '/subs.srt', 0);
+$runner->isAvailable();  // Check FFmpeg installed
+$runner->getVersion();  // Get FFmpeg version
+```
+
+### EncodingHelper (`EncodingHelper`)
+
+Calculates optimal encoding parameters:
+
+```php
+$helper = new EncodingHelper();
+
+$params = $helper->getEncodingParams($sourceInfo, $profile);
+// Returns encoding parameters for FFmpegRunner
+
+// Direct play (no transcoding needed):
+// ['method' => 'direct', 'video_codec' => 'h264', 'audio_codec' => 'aac']
+
+// Transcode required:
+/*
+[
+    'method' => 'transcode',
+    'video_codec' => 'libx264',
+    'audio_codec' => 'aac',
+    'width' => 1920,
+    'height' => 1080,
+    'preset' => 'medium',
+    'crf' => 23,
+    'audio_bitrate' => '192k',
+    'audio_channels' => 2,
+    'audio_sample_rate' => 48000,
+    'container' => 'ts',
+    'format' => 'mpegts'
+]
+*/
+```
+
+### HLS Segment Generation
+
+After transcoding, HLS segments are generated for adaptive streaming:
+
+```php
+// Complete flow
+$jobId = $transcodeManager->startTranscode($streamState, $options);
+$status = $transcodeManager->getTranscodeStatus($jobId);
+
+// Generate HLS playlists
+$hlsStreamer->savePlaylist($jobId, $hlsStreamer->generateMasterPlaylist($jobId, $levels), 'playlist.m3u8');
+$hlsStreamer->savePlaylist($jobId, $hlsStreamer->generateVariantPlaylist($jobId, 0, $segments, 6), 'stream_0.m3u8');
+
+// Serve to client
+$playlistUrl = $hlsStreamer->getPlaylistUrl($jobId);       // Master playlist
+$variantUrl = $hlsStreamer->getVariantPlaylistUrl($jobId, 0); // Variant
+```
+
+---
+
 ### Library Manager (`LibraryManager`)
 
 The `LibraryManager` is the main interface for library operations:

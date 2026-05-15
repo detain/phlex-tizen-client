@@ -11,8 +11,8 @@ Phlex Media Server provides a complete media management and streaming solution:
 - **Real-time SyncPlay**: Watch content together with friends
 - **Live TV Support**: DVR and guide integration
 - **DLNA Streaming**: Standard protocol support for compatible devices
-- **Transcoding**: On-the-fly media conversion via FFmpeg
-- **HLS Streaming**: Adaptive bitrate streaming for web clients
+- **Transcoding**: On-the-fly media conversion via FFmpeg with automatic quality selection
+- **HLS Streaming**: Adaptive bitrate streaming for web clients with multi-quality playlists
 - **WebSocket Events**: Real-time progress and notification delivery
 - **Multi-Source Metadata**: TMDB, TVDB, Fanart.tv, and local NFO file support
 - **Content Filtering**: Parental controls with rating and genre-based filtering
@@ -38,8 +38,8 @@ src/
 ├── Media/              # Media library and metadata
 │   ├── Library/        # Library management (LibraryManager, ItemRepository, MediaScanner)
 │   ├── Metadata/      # Metadata fetching (TMDB, TVDB, Fanart, NFO providers)
-│   ├── Transcoding/    # FFmpeg transcoding
-│   └── Streaming/      # HLS streaming and quality selection
+│   ├── Transcoding/    # FFmpeg transcoding with EncodingHelper
+│   └── Streaming/      # HLS streaming with adaptive bitrate
 ├── Auth/               # Authentication services
 └── Common/             # Shared utilities
 ```
