@@ -1,259 +1,369 @@
-# Phlex Media Server
+# Phlex Tizen TV App
 
-A comprehensive media server platform built with PHP 8.3+, featuring real-time WebSocket communication, HTTP REST APIs, and support for multiple client platforms including Roku, Samsung Tizen, and Windows.
+Samsung Smart TV client application for Phlex Media Server, built with Tizen SDK.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Building the App](#building-the-app)
+- [Testing](#testing)
+- [Deployment to TV](#deployment-to-tv)
+- [Supported Codecs](#supported-codecs)
+- [License](#license)
 
 ## Overview
 
-Phlex Media Server provides a complete media management and streaming solution:
-
-- **Media Library Management**: Organize and browse media collections with automatic scanning
-- **User Authentication**: JWT-based auth with refresh tokens
-- **Real-time SyncPlay**: Watch content together with friends
-- **Live TV Support**: DVR and guide integration
-- **DLNA Streaming**: Standard protocol support for compatible devices
-- **Transcoding**: On-the-fly media conversion via FFmpeg with automatic quality selection
-- **HLS Streaming**: Adaptive bitrate streaming for web clients with multi-quality playlists
-- **WebSocket Events**: Real-time progress and notification delivery
-- **Multi-Source Metadata**: Automatic metadata fetching from TMDB (movies), TVDB (TV series), Fanart.tv (artwork), and local NFO files with 24-hour cache and provider fallback
-- **Content Filtering**: Parental controls with rating and genre-based filtering
-
-## Architecture
-
-```
-src/
-├── Server/
-│   ├── Core/           # Application bootstrap and core
-│   ├── Http/            # HTTP REST API layer
-│   │   ├── Controllers/ # Request handlers
-│   │   ├── Request.php  # HTTP request representation
-│   │   ├── Response.php # HTTP response builder
-│   │   └── Router.php  # Route dispatching
-│   ├── WebSocket/       # Real-time communication
-│   │   ├── Connection.php      # Client connection wrapper
-│   │   ├── ConnectionPool.php  # Connection management
-│   │   ├── MessageHandler.php  # Event routing
-│   │   ├── WebSocketServer.php # Server implementation
-│   │   └── Events.php          # Event type constants
-│   └── WebPortal/       # Web portal (HTML UI)
-│       ├── WebPortalRouter.php # REST API for portal
-│       └── PageRenderer.php    # Smarty template rendering
-├── Session/            # Playback session management
-├── Media/              # Media library and metadata
-│   ├── Library/        # Library management (LibraryManager, ItemRepository, MediaScanner)
-│   ├── Metadata/      # Metadata fetching (TMDB, TVDB, Fanart, NFO providers)
-│   ├── Transcoding/    # FFmpeg transcoding with EncodingHelper
-│   └── Streaming/      # HLS streaming with adaptive bitrate
-├── Auth/               # Authentication services
-└── Common/             # Shared utilities
-
-public/
-├── index.php           # Web portal entry point
-├── templates/          # Smarty templates
-└── assets/             # Static assets (css, js)
-```
-
-## Requirements
-
-- **PHP**: 8.3 or higher
-- **MySQL**: 8.0+ or MariaDB 10.6+
-- **Workerman**: 5.0+ (bundled via Composer)
-- **FFmpeg**: For transcoding (optional)
+Phlex Tizen is a native Samsung Smart TV application that connects to a Phlex Media Server, allowing users to browse their media library and play content directly on their television. The app is built using vanilla JavaScript with webpack for bundling and supports both direct play and transcoded streaming via HLS.
 
 ## Features
 
-### Web Portal
-- **Smarty-based Templates**: Server-side rendered HTML pages using Smarty
-- **REST API Endpoints**: Complete API for library browsing, media info, and user data
-- **JWT Authentication**: Integrated token-based auth with refresh support
-- **Responsive Design**: CSS-first approach with utility classes
-- **JavaScript Client**: ApiClient helper with auth, library, and player helpers
-- **Continue Watching**: Track and display in-progress media
-- **Library Browser**: Browse media by library with item counts
+- **Library Browsing**: Browse movies, TV shows, music, and other media from Phlex
+- **Video Playback**: Support for direct play and HLS streaming with quality selection
+- **Remote Control**: Full Samsung remote control support with intuitive navigation
+- **User Authentication**: Secure login with Phlex account credentials
+- **Progress Tracking**: Automatic resume from last playback position
+- **Subtitle Support**: Multiple subtitle tracks and languages
+- **Audio Tracks**: Multiple audio track selection
+- **Search**: Search across your media library
+- **Favorites**: Mark items as favorites
+- **Watch History**: Track watched items
 
-### Authentication & Security
-- **JWT-based Authentication**: Stateless auth with access tokens (1 hour TTL) and refresh tokens (7 days TTL)
-- **Secure Password Hashing**: Argon2ID for password storage
-- **Multi-Device Sessions**: Track and manage sessions across devices
-- **User Profiles**: Multiple profiles per account with parental controls
-  - Up to 5 profiles per user account
-  - Profile-specific content rating restrictions (G, PG, PG-13, R, NC-17, X, UNRATED)
-  - PIN protection (4 or 6 digits) for profile settings
-  - Genre-based filtering (allowed/blocked genre lists)
-  - Daily watch time limits per profile
-- **Content Rating Filters**: Age-based access restrictions
-- **Audit Logging**: Complete security event logging
+## Prerequisites
 
-### SyncPlay - Group Watching
-- **Synchronized Playback**: Watch content together with friends across devices with sub-second sync accuracy
-- **Host-Controlled Playback**: Only the host can control play/pause/seek; all members receive synchronized commands
-- **NTP-Style Time Sync**: Network time synchronization with latency compensation and drift correction
-- **In-Group Chat**: Real-time messaging with typing indicators and message history
-- **Playback Queue**: Host-managed queue with media info (title, thumbnail)
-- **Host Election**: Automatic host election when current host leaves (oldest member becomes host)
-- **Password Protection**: Optional password protection for private watch parties
-- **Position Tolerance**: Configurable sync tolerance (default 2s) to prevent excessive seeking
+### Development Environment
 
-### Session Management
-- **Device Sessions**: Track authenticated devices with activity timestamps
-- **Playback Progress**: Resume where you left off across sessions
-- **Continue Watching**: Track items in progress per profile
-- **Watch History**: Complete viewing history per profile with:
-  - Automatic completion detection at 90% progress threshold
-  - Watch time statistics (total, daily, by period)
-  - Resume position tracking for seamless playback continuation
+- **Node.js**: Version 18 or higher
+- **npm**: Version 8 or higher (included with Node.js)
+- **Git**: For version control
 
-### Live TV & DVR
-- **Multi-Tuner Support**: DVB-T, DVB-S, DVB-C, and ATSC tuner types
-- **Channel Scanning**: Automatic discovery of broadcast services
-- **Electronic Program Guide**: Full EPG with program info, categories, and search
-- **DVR Scheduling**: Schedule recordings with priority management
-- **Time-Shifting**: Pause and rewind live TV with buffer
-- **Channel Lineups**: Custom channel lineups per user
-- **Favorites**: Personal favorite channels per user
-- **Storage Management**: Recording storage tracking and limits
+### Samsung TV Development
+
+- **Tizen Studio**: Version 4.0 or higher
+- **Samsung TV SDK**: Tizen TV Extensions
+- **Samsung Smart TV**: 2016 model or newer (Tizen OS)
+
+### Phlex Media Server
+
+- **Phlex Media Server**: Version 4.8 or higher
+- **Network**: TV and server must be on the same network
 
 ## Installation
 
+### 1. Clone the Repository
+
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/phlex.git
-cd phlex
-
-# Install dependencies
-composer install
-
-# Configure environment
-cp .env.example .env
-# Edit .env with your database and service credentials
-
-# Run database migrations
-php scripts/migrate.php
-
-# Start the development server
-php start.php server
+git clone https://github.com/detain/phlex-tizen.git
+cd phlex-tizen
 ```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure Environment
+
+Create a `tizen.env` file in the project root (see [Configuration](#configuration) section).
+
+### 4. Start Development Server
+
+```bash
+npm run serve
+```
+
+The app will be available at `http://localhost:8080`.
 
 ## Configuration
 
-Configuration is managed via PHP files in `config/`:
+### Environment Variables
 
-```php
-// config/server.php
-return [
-    'server' => [
-        'name' => 'Phlex Media Server',
-        'host' => '0.0.0.0',
-        'port' => 8080,
-    ],
-    'websocket' => [
-        'host' => '0.0.0.0',
-        'port' => 8097,
-    ],
-    'database' => [
-        'host' => '127.0.0.1',
-        'port' => 3306,
-        'database' => 'phlex',
-        'username' => 'phlex',
-        'password' => 'secure-password',
-    ],
-    'debug' => false,
-];
+Create or edit `tizen.env` in the project root:
+
+```env
+PHLEX_SERVER_URL=http://192.168.1.100:8096
+PHLEX_DEVICE_NAME=Living Room TV
+LOG_LEVEL=info
 ```
 
-## API Reference
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PHLEX_SERVER_URL` | URL of your Phlex Media Server | `http://localhost:8096` |
+| `PHLEX_DEVICE_NAME` | Display name for this TV device | `Samsung Tizen TV` |
+| `LOG_LEVEL` | Logging verbosity | `info` |
 
-### HTTP Endpoints
+### Tizen Configuration
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/health` | Health check |
-| GET | `/system/info` | Server information |
-| POST | `/api/v1/auth/register` | User registration |
-| POST | `/api/v1/auth/login` | User login |
-| POST | `/api/v1/auth/refresh` | Token refresh |
-| GET | `/api/v1/auth/me` | Current user profile |
-| GET | `/api/v1/sessions` | List user sessions |
-| DELETE | `/api/v1/sessions/{id}` | End a session |
-| POST | `/api/v1/sessions/{id}/progress` | Report playback progress |
-| GET | `/api/v1/sessions/{id}/progress` | Get playback state |
+The `app/config.xml` file contains Tizen-specific settings:
 
-### WebSocket Events
+- App ID and version
+- Network access permissions
+- TV capabilities declaration
+- Focus navigation settings
 
-**Connection Events:**
-- `connected` - Sent on successful connection
-- `client_disconnected` - Broadcast when client disconnects
+## Building the App
 
-**Authentication Events:**
-- `auth_request` - Request authentication
-- `auth_success` - Authentication successful
-- `auth_failure` - Authentication failed
-
-**Playback Events:**
-- `playback_start` - Playback started
-- `playback_pause` - Playback paused
-- `playback_stop` - Playback stopped
-- `playback_progress` - Progress update
-- `playback_seek` - Seek performed
-
-**SyncPlay Events:**
-- `syncplay_create_group` - Create watch group
-- `syncplay_join_group` - Join watch group
-- `syncplay_leave_group` - Leave watch group
-- `syncplay_sync_state` - State synchronization
-
-## Development
-
-### Running Tests
+### Development Build
 
 ```bash
-# Run all tests
-./vendor/bin/phpunit
+# Build with development settings
+npm run build:dev
 
-# Run with coverage
-./vendor/bin/phpunit --coverage-html coverage-report
-
-# Run specific test suite
-./vendor/bin/phpunit --testsuite Unit
-./vendor/bin/phpunit --testsuite Integration
+# Watch for changes and rebuild
+npm run watch
 ```
 
-### Code Standards
-
-This project follows PSR-12 coding standards and uses static analysis tools:
+### Production Build
 
 ```bash
-# Check code style
-./vendor/bin/phpcs --standard=PSR12 src/
-
-# Run static analysis
-./vendor/bin/phpstan analyze src/ --level=9
-./vendor/bin/psalm
+# Create production bundle
+npm run build
 ```
 
-### Git Workflow
+Output is placed in the `dist/` directory.
 
-1. Create a feature branch: `git checkout -b feature/my-feature`
-2. Make changes and commit: `git commit -am 'Add new feature'`
-3. Push to remote: `git push origin feature/my-feature`
-4. Create Pull Request on GitHub
-5. After review, merge via squash-merge
+### Packaging for Tizen
 
-## Contributing
+```bash
+# Package the app for Tizen
+node scripts/package.js
+```
 
-1. Fork the repository
-2. Create your feature branch
-3. Ensure all tests pass (`./vendor/bin/phpunit`)
-4. Follow PSR-12 coding standards
-5. Submit a pull request
+This creates a `.wgt` widget file in the `dist/` directory.
+
+## Testing
+
+### Run All Tests
+
+```bash
+npm test
+```
+
+### Run Unit Tests Only
+
+```bash
+npm run test:unit
+```
+
+### Run Integration Tests
+
+```bash
+npm run test:integration
+```
+
+### Code Linting
+
+```bash
+npm run lint
+```
+
+### Run Linting with Auto-fix
+
+```bash
+npm run lint -- --fix
+```
+
+## Deployment to TV
+
+### Option 1: Tizen Studio
+
+1. **Open Tizen Studio**
+   ```bash
+   tizen studio
+   ```
+
+2. **Import Project**
+   - File → Import → Tizen → Tizen Project
+   - Select the `phlex-tizen` directory
+   - Choose "TV" as the platform
+
+3. **Connect Device**
+   - Ensure your TV and computer are on the same network
+   - In Tizen Studio, go to Window → Preferences → Tizen TV → Devices
+   - Add your TV's IP address
+
+4. **Run on Device**
+   - Right-click the project → Run As → Tizen TV Application
+   - Or press `Shift + F11` to run
+
+### Option 2: CLI Deployment
+
+```bash
+# Package the app
+npm run build
+node scripts/package.js
+
+# Deploy via Tizen CLI
+tizen install -n dist/org.phlex.phlextv.wgt -t <TV_IP>
+
+# Launch on TV
+tizen launch -n org.phlex.phlextv
+```
+
+### Option 3: Debugging
+
+```bash
+# Start debug server
+node scripts/debug.js
+
+# In Tizen Studio, attach debugger to running app
+```
+
+## Remote Control
+
+The app supports full Samsung remote control navigation:
+
+| Button | Action |
+|--------|--------|
+| Arrow Up/Down/Left/Right | Navigate through items |
+| OK | Select item / Enter |
+| Back | Go back / Return |
+| Play/Pause | Toggle playback |
+| Stop | Stop playback and return to library |
+| Fast Forward | Seek forward 10 seconds |
+| Rewind | Seek backward 10 seconds |
+| Red (Color) | Toggle subtitles |
+| Green (Color) | Cycle audio tracks |
+| Yellow (Color) | Cycle quality levels |
+| Blue (Color) | Toggle favorite |
+| Info | Show/hide playback info panel |
+| Tools | Show options menu |
+
+## Supported Codecs
+
+### Video
+- H.264 (AVC)
+- H.265 (HEVC)
+- VP9
+
+### Audio
+- AAC
+- AC3 (Dolby Digital)
+- EAC3 (Dolby Digital Plus)
+- DTS
+- FLAC
+- MP3
+
+### Containers
+- MP4
+- MKV
+- WebM
+- TS (MPEG Transport Stream)
+
+### Streaming
+- HLS (HTTP Live Streaming)
+- MPEG-DASH
+- Progressive HTTP download
+
+## Project Structure
+
+```
+phlex-tizen/
+├── app/
+│   ├── index.html           # Main HTML entry point
+│   ├── config.xml           # Tizen configuration
+│   ├── js/
+│   │   ├── main.js          # Application bootstrap
+│   │   ├── api/            # API client modules
+│   │   │   ├── ApiClient.js
+│   │   │   ├── AuthManager.js
+│   │   │   ├── LibraryManager.js
+│   │   │   ├── PlayerManager.js
+│   │   │   └── SessionManager.js
+│   │   ├── player/          # Video player components
+│   │   │   ├── VideoPlayer.js
+│   │   │   ├── HlsPlayer.js
+│   │   │   ├── SubtitleRenderer.js
+│   │   │   └── QualitySelector.js
+│   │   ├── remote/          # Remote control handling
+│   │   │   ├── RemoteManager.js
+│   │   │   ├── PlayerRemoteHandler.js
+│   │   │   └── KeyMapping.js
+│   │   ├── ui/              # User interface views
+│   │   │   ├── App.js
+│   │   │   ├── Router.js
+│   │   │   ├── HomeView.js
+│   │   │   ├── LibraryView.js
+│   │   │   ├── DetailView.js
+│   │   │   └── PlayerView.js
+│   │   ├── config/          # Configuration
+│   │   │   └── constants.js
+│   │   └── utils/           # Utility functions
+│   │       ├── Logger.js
+│   │       ├── Storage.js
+│   │       └── Helpers.js
+│   └── css/                 # Stylesheets
+│       ├── style.css
+│       ├── player.css
+│       ├── components.css
+│       └── themes/
+│           └── dark.css
+├── scripts/                  # Build scripts
+│   ├── build.js
+│   ├── package.js
+│   └── debug.js
+├── tests/                    # Test files
+│   └── unit/
+│       ├── api/
+│       │   └── ApiClient.test.js
+│       ├── remote/
+│       │   └── KeyMapping.test.js
+│       └── utils/
+│           └── Helpers.test.js
+├── .github/
+│   └── workflows/
+│       ├── test.yml
+│       └── lint.yml
+├── babel.config.js           # Babel configuration
+├── webpack.config.js         # Webpack configuration
+├── package.json
+└── README.md
+```
+
+## Troubleshooting
+
+### App Won't Start
+
+1. Ensure your TV supports Tizen OS (2016+ models)
+2. Check that the TV is connected to the same network as the server
+3. Verify the Phlex Media Server is running and accessible
+
+### Playback Issues
+
+1. For buffering issues, check network bandwidth
+2. If direct play fails, the server may transcode (slower start)
+3. Check server logs for codec compatibility warnings
+
+### Remote Not Working
+
+1. Ensure no other device is controlling the TV
+2. Try restarting the TV
+3. Check that the remote's batteries are fresh
 
 ## License
 
-Proprietary - All rights reserved.
+MIT License
 
-## Support
+Copyright (c) 2024 Phlex
 
-For issues and feature requests, please use the GitHub issue tracker.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
----
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-For detailed development documentation, see [DEVELOPER.md](DEVELOPER.md).
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
