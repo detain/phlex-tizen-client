@@ -1,19 +1,59 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlex\Auth;
 
 use Workerman\MySQL\Connection;
 
 /**
  * Manages user profiles with support for multiple profiles per account.
- * Handles profile creation, switching, deletion, and profile-specific settings.
+ *
+ * This class provides comprehensive profile management including:
+ * - Profile CRUD operations (create, read, update, delete)
+ * - Multi-profile support per user account (up to 5 profiles)
+ * - Parental controls via content rating restrictions
+ * - Profile PIN protection for admin actions
+ * - Genre-based content filtering (allowed/blocked genres)
+ * - Daily watch time limits
+ *
+ * Profile Types:
+ * - Standard Profile: Regular user profile with customizable settings
+ * - Admin Profile: Profile with elevated permissions (managed via is_admin flag)
+ *
+ * Parental Control Ratings:
+ * The system supports standard MPAA content ratings in order of restrictiveness:
+ * - G: General Audiences (all ages)
+ * - PG: Parental Guidance Suggested
+ * - PG-13: Parents Strongly Cautioned (ages 13+)
+ * - R: Restricted (ages 17+ unless accompanied)
+ * - NC-17: No One 17 & Under Admitted
+ * - X: Adult content restriction
+ * - UNRATED: Content without a rating (can be blocked via allow_unrated setting)
+ *
+ * @package Phlex\Auth
+ * @author Phlex Development Team
+ * @license Proprietary
+ *
+ * @see WatchHistory For watch history tracking per profile
+ * @see AuthManager For authentication and token management
  */
 class UserProfileManager
 {
+    /**
+     * Database connection instance.
+     *
+     * @var Connection
+     */
     private Connection $db;
 
     /**
-     * Content ratings in order of restrictiveness (least to most restrictive)
+     * Content ratings in order of restrictiveness (least to most restrictive).
+     *
+     * Used for comparing profile content restrictions against media ratings.
+     * Lower values indicate more permissive ratings.
+     *
+     * @var array<string, int>
      */
     public const RATING_ORDER = [
         'G' => 1,
@@ -25,15 +65,77 @@ class UserProfileManager
         'UNRATED' => 7,
     ];
 
+    /**
+     * Maximum number of profiles allowed per user account.
+     *
+     * This limit ensures system performance and user experience quality.
+     *
+     * @var int
+     */
     public const MAX_PROFILES_PER_USER = 5;
 
+    /**
+     * Profile type constants for categorization.
+     *
+     * @deprecated Use is_admin flag instead for permission-based profile types
+     */
+    public const TYPE_STANDARD = 'standard';
+    public const TYPE_ADMIN = 'admin';
+
+    /**
+     * Profile name constraints.
+     *
+     * @var int
+     */
+    public const MIN_NAME_LENGTH = 1;
+    public const MAX_NAME_LENGTH = 100;
+
+    /**
+     * PIN length options for profile protection.
+     *
+     * @var int
+     */
+    public const PIN_LENGTH_4 = 4;
+    public const PIN_LENGTH_6 = 6;
+
+    /**
+     * Default content rating for new profiles.
+     *
+     * @var string
+     */
+    public const DEFAULT_CONTENT_RATING = 'R';
+
+    /**
+     * Constructs a new UserProfileManager instance.
+     *
+     * @param Connection $db Database connection for profile data persistence
+     *
+     * @throws void
+     */
     public function __construct(Connection $db)
     {
         $this->db = $db;
     }
 
     /**
-     * Find a profile by ID
+     * Find a profile by its unique identifier.
+     *
+     * Retrieves a single profile record without associated settings.
+     * Use findByIdWithSettings() when settings are needed.
+     *
+     * @param string $profileId The unique profile identifier (UUID format)
+     *
+     * @return array|null Profile data array with keys: id, user_id, name, avatar_url,
+     *                   is_active, is_admin, created_at, updated_at. Returns null
+     *                   if profile not found.
+     *
+     * @throws void
+     *
+     * @example
+     * $profile = $manager->findById('prof_abc123');
+     * if ($profile !== null) {
+     *     echo $profile['name'];
+     * }
      */
     public function findById(string $profileId): ?array
     {
@@ -45,7 +147,26 @@ class UserProfileManager
     }
 
     /**
-     * Find a profile by ID with settings
+     * Find a profile by ID with full settings loaded.
+     *
+     * Retrieves profile data joined with profile_settings for complete
+     * profile information including content rating, PIN status, and
+     * genre restrictions.
+     *
+     * @param string $profileId The unique profile identifier (UUID format)
+     *
+     * @return array|null Profile data with nested 'settings' key containing:
+     *                    - content_rating: string (G, PG, PG-13, R, NC-17, X, UNRATED)
+     *                    - pin_required_for_admin: bool
+     *                    - max_daily_watch_time: int (seconds, 0 = unlimited)
+     *                    - allow_unrated: bool
+     *                    - allowed_genres: array|null
+     *                    - blocked_genres: array|null
+     *                    Returns null if profile not found.
+     *
+     * @throws void
+     *
+     * @see findById() For simple profile lookup without settings
      */
     public function findByIdWithSettings(string $profileId): ?array
     {
@@ -66,7 +187,28 @@ class UserProfileManager
     }
 
     /**
-     * Get all profiles for a user
+     * Get all profiles associated with a user account.
+     *
+     * Returns profiles ordered by active status (active first) then by name.
+     * Each profile includes basic content_rating from settings.
+     *
+     * @param string $userId The unique user identifier (UUID format)
+     *
+     * @return array<int, array> Array of profile arrays, each containing:
+     *                           - id: string
+     *                           - user_id: string
+     *                           - name: string
+     *                           - avatar_url: string|null
+     *                           - is_active: bool
+     *                           - is_admin: bool
+     *                           - created_at: string (Y-m-d H:i:s)
+     *                           - updated_at: string (Y-m-d H:i:s)
+     *                           - content_rating: string (if settings exist)
+     *                           - settings: array (if content_rating exists)
+     *
+     * @throws void
+     *
+     * @see getActiveProfile() To get only the currently active profile
      */
     public function findByUserId(string $userId): array
     {
@@ -83,7 +225,19 @@ class UserProfileManager
     }
 
     /**
-     * Get the active profile for a user
+     * Get the currently active profile for a user.
+     *
+     * Returns the profile marked as active (only one active profile per user).
+     * Used for determining which profile's settings to apply for media filtering.
+     *
+     * @param string $userId The unique user identifier (UUID format)
+     *
+     * @return array|null Profile array with settings, or null if no active
+     *                   profile exists. See findByIdWithSettings() return format.
+     *
+     * @throws void
+     *
+     * @see findByUserId() To get all profiles for a user
      */
     public function getActiveProfile(string $userId): ?array
     {
@@ -104,7 +258,49 @@ class UserProfileManager
     }
 
     /**
-     * Create a new profile for a user
+     * Create a new profile for a user account.
+     *
+     * Creates both the profile record and associated default settings.
+     * The first profile created for a user automatically becomes active.
+     *
+     * @param string $userId The unique user identifier (UUID format)
+     * @param array{
+     *     name: string,
+     *     avatar_url?: string|null,
+     *     is_active?: bool,
+     *     is_admin?: bool,
+     *     content_rating?: string,
+     *     pin?: string,
+     *     pin_required_for_admin?: bool,
+     *     max_daily_watch_time?: int,
+     *     allowed_genres?: array<string>,
+     *     blocked_genres?: array<string>,
+     *     allow_unrated?: bool
+     * } $data Profile data including:
+     *         - name (required): Profile display name (1-100 chars)
+     *         - avatar_url (optional): Profile picture URL
+     *         - is_active (optional): Set as active profile (default: false)
+     *         - is_admin (optional): Admin privileges (default: false)
+     *         - content_rating (optional): Max allowed rating (default: 'R')
+     *         - pin (optional): 4 or 6 digit PIN for protection
+     *         - pin_required_for_admin (optional): Require PIN for admin actions
+     *         - max_daily_watch_time (optional): Seconds, 0 = unlimited
+     *         - allowed_genres (optional): Array of permitted genres
+     *         - blocked_genres (optional): Array of prohibited genres
+     *         - allow_unrated (optional): Allow unrated content (default: true)
+     *
+     * @return string The generated UUID for the new profile
+     *
+     * @throws \InvalidArgumentException If maximum profiles reached (5) or
+     *                                    invalid name (empty or >100 chars)
+     *
+     * @example
+     * $profileId = $manager->create('user_123', [
+     *     'name' => 'Kids Profile',
+     *     'content_rating' => 'G',
+     *     'pin' => '1234',
+     *     'allowed_genres' => ['Animation', 'Family'],
+     * ]);
      */
     public function create(string $userId, array $data): string
     {
@@ -122,8 +318,10 @@ class UserProfileManager
 
         // Validate name
         $name = trim($data['name'] ?? '');
-        if (strlen($name) < 1 || strlen($name) > 100) {
-            throw new \InvalidArgumentException('Profile name must be 1-100 characters');
+        if (strlen($name) < self::MIN_NAME_LENGTH || strlen($name) > self::MAX_NAME_LENGTH) {
+            throw new \InvalidArgumentException(
+                sprintf('Profile name must be %d-%d characters', self::MIN_NAME_LENGTH, self::MAX_NAME_LENGTH)
+            );
         }
 
         $id = $this->generateUuid();
@@ -144,7 +342,7 @@ class UserProfileManager
 
         // Create default settings for the profile
         $this->createProfileSettings($id, [
-            'content_rating' => $data['content_rating'] ?? 'R',
+            'content_rating' => $data['content_rating'] ?? self::DEFAULT_CONTENT_RATING,
             'pin_hash' => isset($data['pin']) ? password_hash($data['pin'], PASSWORD_ARGON2ID) : null,
             'pin_required_for_admin' => $data['pin_required_for_admin'] ?? false,
             'max_daily_watch_time' => $data['max_daily_watch_time'] ?? 0,
@@ -157,7 +355,31 @@ class UserProfileManager
     }
 
     /**
-     * Update a profile
+     * Update an existing profile's information and settings.
+     *
+     * Supports partial updates - only provided fields are modified.
+     * This method handles both profile basic info and profile settings updates.
+     *
+     * @param string $profileId The unique profile identifier (UUID format)
+     * @param array{
+     *     name?: string,
+     *     avatar_url?: string|null,
+     *     is_active?: bool,
+     *     content_rating?: string,
+     *     pin?: string,
+     *     pin_required_for_admin?: bool,
+     *     max_daily_watch_time?: int,
+     *     allowed_genres?: array<string>|null,
+     *     blocked_genres?: array<string>|null,
+     *     allow_unrated?: bool
+     * } $data Fields to update. See create() for field descriptions.
+     *
+     * @return void
+     *
+     * @throws \InvalidArgumentException If profile not found or invalid name
+     *
+     * @see create() For field descriptions and validation rules
+     * @see delete() To remove a profile entirely
      */
     public function update(string $profileId, array $data): void
     {
@@ -171,8 +393,10 @@ class UserProfileManager
 
         if (isset($data['name'])) {
             $name = trim($data['name']);
-            if (strlen($name) < 1 || strlen($name) > 100) {
-                throw new \InvalidArgumentException('Profile name must be 1-100 characters');
+            if (strlen($name) < self::MIN_NAME_LENGTH || strlen($name) > self::MAX_NAME_LENGTH) {
+                throw new \InvalidArgumentException(
+                    sprintf('Profile name must be %d-%d characters', self::MIN_NAME_LENGTH, self::MAX_NAME_LENGTH)
+                );
             }
             $sets[] = 'name = ?';
             $values[] = $name;
@@ -205,7 +429,20 @@ class UserProfileManager
     }
 
     /**
-     * Switch the active profile for a user
+     * Switch the active profile for a user.
+     *
+     * Deactivates all existing profiles for the user and activates
+     * the specified profile. The profile must belong to the user.
+     *
+     * @param string $userId The unique user identifier (UUID format)
+     * @param string $profileId The profile to make active (UUID format)
+     *
+     * @return bool True if switch successful, false if profile doesn't
+     *              exist or doesn't belong to user
+     *
+     * @throws void
+     *
+     * @see getActiveProfile() To retrieve the currently active profile
      */
     public function switchProfile(string $userId, string $profileId): bool
     {
@@ -229,7 +466,19 @@ class UserProfileManager
     }
 
     /**
-     * Delete a profile
+     * Delete a profile and its associated data.
+     *
+     * Permanently removes the profile and its settings from the database.
+     * This action cannot be undone. Consider using switchProfile() to
+     * deactivate rather than delete if the profile should remain accessible.
+     *
+     * @param string $profileId The unique profile identifier (UUID format)
+     *
+     * @return void
+     *
+     * @throws \InvalidArgumentException If profile not found
+     *
+     * @see update() To modify profile settings without deletion
      */
     public function delete(string $profileId): void
     {
@@ -242,7 +491,20 @@ class UserProfileManager
     }
 
     /**
-     * Verify a profile PIN
+     * Verify if a provided PIN matches the profile's PIN.
+     *
+     * Used for parental control verification before allowing access to
+     * restricted content or administrative profile actions.
+     *
+     * @param string $profileId The unique profile identifier (UUID format)
+     * @param string $pin The PIN to verify (4 or 6 digits)
+     *
+     * @return bool True if PIN matches or no PIN is set, false if incorrect
+     *
+     * @throws void
+     *
+     * @see setPin() To set or change a profile PIN
+     * @see removePin() To remove the PIN requirement
      */
     public function verifyPin(string $profileId, string $pin): bool
     {
@@ -259,11 +521,25 @@ class UserProfileManager
     }
 
     /**
-     * Set or update a profile PIN
+     * Set or update the PIN for a profile.
+     *
+     * The PIN provides additional protection for profile settings and
+     * content access restrictions. Uses Argon2ID for secure hashing.
+     *
+     * @param string $profileId The unique profile identifier (UUID format)
+     * @param string $pin The new PIN (must be exactly 4 or 6 digits)
+     *
+     * @return void
+     *
+     * @throws \InvalidArgumentException If PIN is not 4 or 6 digits or contains
+     *                                    non-digit characters
+     *
+     * @see verifyPin() To check if a PIN is correct
+     * @see removePin() To remove PIN protection
      */
     public function setPin(string $profileId, string $pin): void
     {
-        if (strlen($pin) !== 4 && strlen($pin) !== 6) {
+        if (strlen($pin) !== self::PIN_LENGTH_4 && strlen($pin) !== self::PIN_LENGTH_6) {
             throw new \InvalidArgumentException('PIN must be 4 or 6 digits');
         }
 
@@ -280,7 +556,19 @@ class UserProfileManager
     }
 
     /**
-     * Remove a profile PIN
+     * Remove the PIN requirement from a profile.
+     *
+     * Disables PIN protection for the profile. After calling this method,
+     * verifyPin() will return true for any PIN value.
+     *
+     * @param string $profileId The unique profile identifier (UUID format)
+     *
+     * @return void
+     *
+     * @throws void
+     *
+     * @see setPin() To set a new PIN
+     * @see verifyPin() For PIN verification logic
      */
     public function removePin(string $profileId): void
     {
@@ -291,7 +579,25 @@ class UserProfileManager
     }
 
     /**
-     * Check if content rating is allowed for a profile
+     * Check if a content rating is allowed for a profile.
+     *
+     * Used for parental control filtering. Compares the media's content rating
+     * against the profile's maximum allowed rating setting.
+     *
+     * Content Rating Hierarchy (least to most restrictive):
+     * - G (1) < PG (2) < PG-13 (3) < R (4) < NC-17 (5) < X (6) < UNRATED (7)
+     *
+     * A profile with PG-13 rating allows: G, PG, PG-13
+     *
+     * @param string $profileId The unique profile identifier (UUID format)
+     * @param string $contentRating The content rating to check (G, PG, PG-13, R, NC-17, X, UNRATED)
+     *
+     * @return bool True if content is allowed, false if restricted.
+     *              Returns true if no settings exist (no restrictions).
+     *
+     * @throws void
+     *
+     * @see getAllowedRatings() To get list of all allowed ratings for a profile
      */
     public function isContentRatingAllowed(string $profileId, string $contentRating): bool
     {
@@ -312,7 +618,7 @@ class UserProfileManager
         }
 
         // Check rating order
-        $profileRating = $settings['content_rating'] ?? 'R';
+        $profileRating = $settings['content_rating'] ?? self::DEFAULT_CONTENT_RATING;
         $profileRatingLevel = self::RATING_ORDER[$profileRating] ?? 4;
         $contentRatingLevel = self::RATING_ORDER[$contentRating] ?? 4;
 
@@ -320,7 +626,20 @@ class UserProfileManager
     }
 
     /**
-     * Get allowed content ratings for a profile
+     * Get all content ratings allowed for a profile.
+     *
+     * Returns an array of rating codes that the profile is permitted to access,
+     * based on the profile's maximum content rating setting and unrated content
+     * preference.
+     *
+     * @param string $profileId The unique profile identifier (UUID format)
+     *
+     * @return array<string> Array of allowed rating codes (e.g., ['G', 'PG', 'PG-13']).
+     *                      Returns all 7 ratings if no settings exist.
+     *
+     * @throws void
+     *
+     * @see isContentRatingAllowed() To check a single rating
      */
     public function getAllowedRatings(string $profileId): array
     {
@@ -334,7 +653,7 @@ class UserProfileManager
         }
 
         $settings = $result[0];
-        $maxRating = $settings['content_rating'] ?? 'R';
+        $maxRating = $settings['content_rating'] ?? self::DEFAULT_CONTENT_RATING;
         $maxLevel = self::RATING_ORDER[$maxRating] ?? 4;
 
         $allowed = [];
@@ -352,7 +671,25 @@ class UserProfileManager
     }
 
     /**
-     * Create default profile settings
+     * Create default profile settings for a new profile.
+     *
+     * Internal method called during profile creation to establish
+     * default parental control and restriction settings.
+     *
+     * @param string $profileId The profile identifier to create settings for
+     * @param array{
+     *     content_rating?: string,
+     *     pin_hash?: string|null,
+     *     pin_required_for_admin?: bool,
+     *     max_daily_watch_time?: int,
+     *     allowed_genres?: array<string>|null,
+     *     blocked_genres?: array<string>|null,
+     *     allow_unrated?: bool
+     * } $data Settings data (see create() for field descriptions)
+     *
+     * @return void
+     *
+     * @internal
      */
     private function createProfileSettings(string $profileId, array $data): void
     {
@@ -365,7 +702,7 @@ class UserProfileManager
             [
                 $id,
                 $profileId,
-                $data['content_rating'] ?? 'R',
+                $data['content_rating'] ?? self::DEFAULT_CONTENT_RATING,
                 $data['pin_hash'] ?? null,
                 $data['pin_required_for_admin'] ?? false,
                 $data['max_daily_watch_time'] ?? 0,
@@ -377,7 +714,25 @@ class UserProfileManager
     }
 
     /**
-     * Update profile settings
+     * Update profile settings for an existing profile.
+     *
+     * Internal method handling partial updates to profile settings.
+     * Only modifies settings that are explicitly provided in $data.
+     *
+     * @param string $profileId The profile identifier to update settings for
+     * @param array{
+     *     content_rating?: string,
+     *     pin?: string,
+     *     pin_required_for_admin?: bool,
+     *     max_daily_watch_time?: int,
+     *     allowed_genres?: array<string>|null,
+     *     blocked_genres?: array<string>|null,
+     *     allow_unrated?: bool
+     * } $data Settings fields to update (see create() for field descriptions)
+     *
+     * @return void
+     *
+     * @internal
      */
     private function updateProfileSettings(string $profileId, array $data): void
     {
@@ -431,7 +786,16 @@ class UserProfileManager
     }
 
     /**
-     * Hydrate a profile row with parsed settings
+     * Hydrate a database row into a complete profile array.
+     *
+     * Transforms raw database records (including JOINed settings) into
+     * structured arrays with properly typed and parsed values.
+     *
+     * @param array $row Raw database row from user_profiles LEFT JOIN profile_settings
+     *
+     * @return array Hydrated profile array with settings sub-array when applicable
+     *
+     * @internal
      */
     private function hydrateProfile(array $row): array
     {
@@ -468,7 +832,14 @@ class UserProfileManager
     }
 
     /**
-     * Generate a UUID v4
+     * Generate a UUID v4 string.
+     *
+     * Creates a random UUID suitable for use as a unique identifier.
+     * Format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx (RFC 4122 compliant)
+     *
+     * @return string UUID v4 string
+     *
+     * @internal
      */
     private function generateUuid(): string
     {

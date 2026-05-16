@@ -75,6 +75,11 @@ public/
 - **Secure Password Hashing**: Argon2ID for password storage
 - **Multi-Device Sessions**: Track and manage sessions across devices
 - **User Profiles**: Multiple profiles per account with parental controls
+  - Up to 5 profiles per user account
+  - Profile-specific content rating restrictions (G, PG, PG-13, R, NC-17, X, UNRATED)
+  - PIN protection (4 or 6 digits) for profile settings
+  - Genre-based filtering (allowed/blocked genre lists)
+  - Daily watch time limits per profile
 - **Content Rating Filters**: Age-based access restrictions
 - **Audit Logging**: Complete security event logging
 
@@ -91,8 +96,11 @@ public/
 ### Session Management
 - **Device Sessions**: Track authenticated devices with activity timestamps
 - **Playback Progress**: Resume where you left off across sessions
-- **Continue Watching**: Track items in progress
-- **Watch History**: Complete viewing history per profile
+- **Continue Watching**: Track items in progress per profile
+- **Watch History**: Complete viewing history per profile with:
+  - Automatic completion detection at 90% progress threshold
+  - Watch time statistics (total, daily, by period)
+  - Resume position tracking for seamless playback continuation
 
 ### Live TV & DVR
 - **Multi-Tuner Support**: DVB-T, DVB-S, DVB-C, and ATSC tuner types

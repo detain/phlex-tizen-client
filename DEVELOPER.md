@@ -1362,27 +1362,244 @@ $handler->isRefreshToken($token);  // true for refresh tokens
 
 ### UserProfileManager (`UserProfileManager`)
 
-Supports multiple profiles per account with parental controls:
+Manages multiple profiles per account with comprehensive parental controls:
+
+**Profile Types:**
+- Standard Profile: Regular user profile with customizable content restrictions
+- Admin Profile: Profile with elevated permissions for account management
+
+**Parental Control Ratings:**
+The system supports MPAA content ratings in order of restrictiveness:
+| Rating | Level | Description |
+|--------|-------|-------------|
+| G | 1 | General Audiences - all ages |
+| PG | 2 | Parental Guidance Suggested |
+| PG-13 | 3 | Parents Strongly Cautioned - ages 13+ |
+| R | 4 | Restricted - ages 17+ unless accompanied |
+| NC-17 | 5 | No One 17 & Under Admitted |
+| X | 6 | Adult content restriction |
+| UNRATED | 7 | Content without rating (controlled by allow_unrated flag) |
+
+**Profile Settings:**
+- content_rating: Maximum allowed content rating
+- pin: 4 or 6 digit PIN for parental control verification
+- pin_required_for_admin: Require PIN for admin actions
+- max_daily_watch_time: Daily watch time limit (0 = unlimited)
+- allowed_genres: Whitelist of permitted genre tags
+- blocked_genres: Blacklist of prohibited genre tags
+- allow_unrated: Whether to allow unrated content
 
 ```php
-// Create a profile
+// Create a profile with parental controls
 $profileId = $profileManager->create('user-123', [
     'name' => 'Kids Profile',
     'content_rating' => 'G',
     'pin' => '1234',
-    'allowed_genres' => ['Animation', 'Family'],
+    'pin_required_for_admin' => true,
+    'allowed_genres' => ['Animation', 'Family', 'Children'],
+    'blocked_genres' => ['Horror', 'Violence'],
+    'allow_unrated' => false,
+    'max_daily_watch_time' => 7200, // 2 hours
 ]);
+
+// Find profile with all settings
+$profile = $profileManager->findByIdWithSettings($profileId);
+
+// Get all profiles for a user
+$profiles = $profileManager->findByUserId('user-123');
+$active = $profileManager->getActiveProfile('user-123');
 
 // Check content rating access
 $allowed = $profileManager->isContentRatingAllowed($profileId, 'PG-13');
+// Returns: false for PG-13 when profile only allows G, PG
+
+// Get all allowed ratings for a profile
+$ratings = $profileManager->getAllowedRatings($profileId);
+// Returns: ['G', 'PG'] for a PG-13 profile
 
 // Verify profile PIN
 if ($profileManager->verifyPin($profileId, '1234')) {
-    // PIN verified
+    // PIN verified - allow access to restricted content
 }
+
+// Switch active profile
+$profileManager->switchProfile('user-123', 'profile-456');
+
+// Delete a profile
+$profileManager->delete('profile-456');
 ```
 
 ### WatchHistory (`WatchHistory`)
+
+Tracks watch history and playback progress per profile with automatic completion detection:
+
+**Tick Format:**
+All position/duration values use 100-nanosecond tick intervals (standard media format):
+- 1 tick = 100 nanoseconds
+- 1 millisecond = 10,000 ticks
+- 1 second = 10,000,000 ticks
+- 1 hour = 36,000,000,000 ticks
+
+**Playback Statuses:**
+| Status | Description |
+|--------|-------------|
+| playing | Media is actively playing |
+| paused | Playback is paused |
+| stopped | Playback was stopped |
+| completed | Reached 90% threshold or manually marked |
+
+```php
+// Update watch progress (position in ticks)
+$history = $watchHistory->updateProgress(
+    'profile-123',
+    'media-item-456',
+    12000000000,  // 20 minutes in ticks (20 * 60 * 10000000)
+    36000000000,  // 60 minutes in ticks
+    WatchHistory::STATUS_PLAYING
+);
+// Returns entry with: id, position_ticks, duration_ticks, progress_percent, etc.
+
+// Get continue watching (items in progress < 90%)
+$continueWatching = $watchHistory->getContinueWatching('profile-123', 10);
+
+// Get recently completed items
+$completed = $watchHistory->getRecentlyCompleted('profile-123', 20);
+
+// Check if media has been completed
+if ($watchHistory->hasWatched('profile-123', 'media-item-456')) {
+    // Already watched
+}
+
+// Get resume position (null if completed)
+$resumePosition = $watchHistory->getResumePosition('profile-123', 'media-item-456');
+// Returns: 12000000000 (ticks) or null
+
+// Get watch time statistics
+$totalSeconds = $watchHistory->getTotalWatchTime('profile-123'); // All time
+$todaySeconds = $watchHistory->getTodayWatchTime('profile-123'); // Today only
+$byDay = $watchHistory->getWatchTimeByDay('profile-123', 30); // Last 30 days
+// Returns: ['2024-01-15' => 3600, '2024-01-14' => 7200, ...] (seconds per day)
+
+// Clear history
+$watchHistory->clearHistory('profile-123');
+$watchHistory->removeFromHistory('profile-123', 'media-item-456');
+```
+
+---
+
+## User Management Architecture
+
+The User Management system provides per-profile settings, parental controls, and watch history tracking.
+
+### Database Schema
+
+**user_profiles table:**
+```sql
+CREATE TABLE user_profiles (
+    id VARCHAR(36) PRIMARY KEY,
+    user_id VARCHAR(36) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    avatar_url VARCHAR(500),
+    is_active BOOLEAN DEFAULT FALSE,
+    is_admin BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_user_id (user_id)
+);
+```
+
+**profile_settings table:**
+```sql
+CREATE TABLE profile_settings (
+    id VARCHAR(36) PRIMARY KEY,
+    profile_id VARCHAR(36) NOT NULL UNIQUE,
+    content_rating ENUM('G','PG','PG-13','R','NC-17','X','UNRATED') DEFAULT 'R',
+    pin_hash VARCHAR(255),
+    pin_required_for_admin BOOLEAN DEFAULT FALSE,
+    max_daily_watch_time INT DEFAULT 0,
+    allowed_genres JSON,
+    blocked_genres JSON,
+    allow_unrated BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (profile_id) REFERENCES user_profiles(id) ON DELETE CASCADE
+);
+```
+
+**watch_history table:**
+```sql
+CREATE TABLE watch_history (
+    id VARCHAR(36) PRIMARY KEY,
+    profile_id VARCHAR(36) NOT NULL,
+    media_item_id VARCHAR(36) NOT NULL,
+    position_ticks BIGINT DEFAULT 0,
+    duration_ticks BIGINT,
+    playback_status ENUM('playing','paused','stopped','completed') DEFAULT 'stopped',
+    progress_percent DECIMAL(5,2) DEFAULT 0.00,
+    last_watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP,
+    UNIQUE KEY unique_profile_media (profile_id, media_item_id),
+    INDEX idx_profile_status (profile_id, playback_status),
+    FOREIGN KEY (profile_id) REFERENCES user_profiles(id) ON DELETE CASCADE
+);
+```
+
+### Component Responsibilities
+
+| Component | Responsibility |
+|-----------|----------------|
+| `UserProfileManager` | Profile CRUD, parental controls, PIN verification |
+| `WatchHistory` | Progress tracking, completion detection, watch time analytics |
+
+### Profile Flow
+
+```
+Profile Creation:
+    AuthManager::register() → Creates default profile
+        OR
+    UserProfileManager::create() → Creates additional profile
+        → Creates profile_settings row
+        → Returns profile ID
+
+Profile Switch:
+    UserProfileManager::switchProfile()
+        → Deactivates all user profiles
+        → Activates target profile
+        → Updates session context
+
+Content Access Check:
+    Client requests media
+        → UserProfileManager::isContentRatingAllowed()
+        → WatchHistory::hasWatched() (optional)
+        → Return allowed/disallowed
+
+Progress Update:
+    PlaybackController::reportProgress()
+        → WatchHistory::updateProgress()
+        → Auto-completion at 90% threshold
+        → Updates last_watched_at, completed_at
+```
+
+### Tick Conversion Reference
+
+```php
+// Common tick conversions for playback
+$one_second_ticks = 10000000;
+$one_minute_ticks = 600000000;
+$one_hour_ticks = 36000000000;
+
+// Convert ticks to seconds
+$seconds = (int)($ticks / 10000000);
+
+// Convert seconds to ticks
+$ticks = $seconds * 10000000;
+
+// Convert position to progress percentage
+$progress = round(($position_ticks / $duration_ticks) * 100, 2);
+```
+
+---
+
+## Session Management Architecture
 
 Tracks watch history per profile:
 
