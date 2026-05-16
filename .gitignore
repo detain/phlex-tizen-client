@@ -1,2 +1,6 @@
+package-lock.json
 node_modules
 dist
+
+# Caliber local state
+.caliber/
