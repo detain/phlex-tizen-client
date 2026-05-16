@@ -2,7 +2,7 @@
  * Helpers Unit Tests
  */
 
-import Helpers from '../../app/js/utils/Helpers.js';
+import Helpers from '../../../app/js/utils/Helpers.js';
 
 describe('Helpers', () => {
     describe('formatDuration', () => {

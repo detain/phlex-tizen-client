@@ -27,5 +27,5 @@ export default {
     // UI
     INFO_PANEL_TIMEOUT: 3000, // ms
     FOCUS_CLASS: 'focusable',
-    SELECTED_CLASS: 'selected'
+    SELECTED_CLASS: 'selected',
 };

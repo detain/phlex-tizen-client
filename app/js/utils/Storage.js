@@ -3,6 +3,8 @@
  * Handles local storage with fallback to Tizen-specific storage
  */
 
+import Logger from './Logger.js';
+
 const Storage = {
     /**
      * Get item from storage
@@ -10,7 +12,9 @@ const Storage = {
     get(key) {
         try {
             const value = localStorage.getItem(key);
-            if (value === null) return null;
+            if (value === null) {
+                return null;
+            }
 
             try {
                 return JSON.parse(value);
@@ -61,7 +65,7 @@ const Storage = {
             Logger.warn('Storage.clear failed', { error });
             return false;
         }
-    }
+    },
 };
 
 export default Storage;

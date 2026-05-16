@@ -76,7 +76,7 @@ class HomeView {
             photos: '🖼️',
             homevideos: '📹',
             games: '🎮',
-            series: '📺'
+            series: '📺',
         };
         return icons[type] || '📁';
     }
@@ -95,7 +95,7 @@ class HomeView {
         }
 
         // Card click handlers
-        cards.forEach((card, index) => {
+        cards.forEach((card, _index) => {
             card.addEventListener('click', () => {
                 this.selectLibrary(card.dataset.id);
             });

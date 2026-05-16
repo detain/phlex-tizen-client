@@ -4,7 +4,6 @@
 
 import app from './ui/App.js';
 import Logger from './utils/Logger.js';
-import remoteManager from './remote/RemoteManager.js';
 
 Logger.info('Phlex Tizen App starting...');
 

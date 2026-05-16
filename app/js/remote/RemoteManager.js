@@ -32,7 +32,9 @@ class RemoteManager {
      * Handle key down event
      */
     onKeyDown(event) {
-        if (!this.enabled) return;
+        if (!this.enabled) {
+            return;
+        }
 
         const keyCode = event.keyCode;
         const mappedKey = KeyMapping.mapKeyCode(keyCode);
@@ -68,7 +70,9 @@ class RemoteManager {
      * Handle key up event
      */
     onKeyUp(event) {
-        if (!this.enabled) return;
+        if (!this.enabled) {
+            return;
+        }
 
         const keyCode = event.keyCode;
         const mappedKey = KeyMapping.mapKeyCode(keyCode);
@@ -130,14 +134,20 @@ class RemoteManager {
     }
 
     off(event, callback) {
-        if (!this.listeners.has(event)) return;
+        if (!this.listeners.has(event)) {
+            return;
+        }
         const callbacks = this.listeners.get(event);
         const index = callbacks.indexOf(callback);
-        if (index > -1) callbacks.splice(index, 1);
+        if (index > -1) {
+            callbacks.splice(index, 1);
+        }
     }
 
     emit(event, data) {
-        if (!this.listeners.has(event)) return;
+        if (!this.listeners.has(event)) {
+            return;
+        }
         this.listeners.get(event).forEach(callback => callback(data));
     }
 

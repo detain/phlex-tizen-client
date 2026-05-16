@@ -2,7 +2,7 @@
  * KeyMapping Unit Tests
  */
 
-import KeyMapping from '../../app/js/remote/KeyMapping.js';
+import KeyMapping from '../../../app/js/remote/KeyMapping.js';
 
 describe('KeyMapping', () => {
     describe('mapKeyCode', () => {

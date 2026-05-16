@@ -91,7 +91,9 @@ class AuthManager {
     }
 
     off(event, callback) {
-        if (!this.listeners.has(event)) return;
+        if (!this.listeners.has(event)) {
+            return;
+        }
         const callbacks = this.listeners.get(event);
         const index = callbacks.indexOf(callback);
         if (index > -1) {
@@ -100,7 +102,9 @@ class AuthManager {
     }
 
     emit(event, data) {
-        if (!this.listeners.has(event)) return;
+        if (!this.listeners.has(event)) {
+            return;
+        }
         this.listeners.get(event).forEach(callback => callback(data));
     }
 }

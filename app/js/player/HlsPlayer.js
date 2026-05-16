@@ -42,7 +42,7 @@ class HlsPlayer extends Hls {
             // Tizen-specific
             enableSoftwareAES: true,
 
-            ...config
+            ...config,
         };
 
         super(tizenConfig);
@@ -63,7 +63,7 @@ class HlsPlayer extends Hls {
                 width: level.width,
                 bitrate: level.bitrate,
                 name: `${level.height}p`,
-                url: level.url
+                url: level.url,
             }));
 
             this.emit('qualityLevels', this.qualityLevels);
@@ -78,7 +78,7 @@ class HlsPlayer extends Hls {
             this.emit('qualityChanged', {
                 level: data.level,
                 quality: level,
-                isAuto: this.isAutoLevel
+                isAuto: this.isAutoLevel,
             });
         });
 
@@ -87,7 +87,7 @@ class HlsPlayer extends Hls {
             this.emit('fragmentLoaded', {
                 sn: data.frag.sn,
                 duration: data.frag.duration,
-                size: data.frag.length
+                size: data.frag.length,
             });
         });
 
@@ -110,38 +110,38 @@ class HlsPlayer extends Hls {
         const { type, details, fatal } = data;
 
         switch (details) {
-            case Hls.ErrorDetails.FRAG_LOAD_ERROR:
-                Logger.warn('Fragment load error, retrying...', { fatal, url: data.frag?.url });
-                if (!fatal) {
-                    // Non-fatal, let HLS handle recovery
-                    return;
-                }
-                break;
+        case Hls.ErrorDetails.FRAG_LOAD_ERROR:
+            Logger.warn('Fragment load error, retrying...', { fatal, url: data.frag?.url });
+            if (!fatal) {
+                // Non-fatal, let HLS handle recovery
+                return;
+            }
+            break;
 
-            case Hls.ErrorDetails.LEVEL_LOAD_ERROR:
-                Logger.warn('Level load error, retrying...', { fatal });
-                if (!fatal) {
-                    return;
-                }
-                break;
+        case Hls.ErrorDetails.LEVEL_LOAD_ERROR:
+            Logger.warn('Level load error, retrying...', { fatal });
+            if (!fatal) {
+                return;
+            }
+            break;
 
-            case Hls.ErrorDetails.MANIFEST_LOAD_ERROR:
-                Logger.error('Manifest load error', { fatal });
-                this.emit('manifestError', data);
-                break;
+        case Hls.ErrorDetails.MANIFEST_LOAD_ERROR:
+            Logger.error('Manifest load error', { fatal });
+            this.emit('manifestError', data);
+            break;
 
-            case Hls.ErrorDetails.BUFFER_APPEND_ERROR:
-                Logger.error('Buffer append error', { fatal });
-                this.emit('bufferError', data);
-                break;
+        case Hls.ErrorDetails.BUFFER_APPEND_ERROR:
+            Logger.error('Buffer append error', { fatal });
+            this.emit('bufferError', data);
+            break;
 
-            case Hls.ErrorDetails.BUFFER_FULL_ERROR:
-                Logger.warn('Buffer full, reducing buffer size');
-                // Try to reduce buffer
-                break;
+        case Hls.ErrorDetails.BUFFER_FULL_ERROR:
+            Logger.warn('Buffer full, reducing buffer size');
+            // Try to reduce buffer
+            break;
 
-            default:
-                Logger.error('HLS error', { type, details, fatal });
+        default:
+            Logger.error('HLS error', { type, details, fatal });
         }
 
         if (fatal) {

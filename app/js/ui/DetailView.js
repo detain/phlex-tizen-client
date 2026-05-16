@@ -3,7 +3,6 @@
  * Shows item details with play option
  */
 
-import api from '../api/ApiClient.js';
 import libraryManager from '../api/LibraryManager.js';
 import Logger from '../utils/Logger.js';
 import Helpers from '../utils/Helpers.js';

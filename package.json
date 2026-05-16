@@ -28,14 +28,23 @@
     "transform": {
       "^.+\\.js$": "babel-jest"
     },
-    "moduleFileExtensions": ["js", "json"],
-    "testMatch": ["**/tests/**/*.test.js"],
+    "moduleFileExtensions": [
+      "js",
+      "json"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.js"
+    ],
     "collectCoverageFrom": [
       "app/js/**/*.js",
       "!app/js/main.js"
     ],
     "coverageDirectory": "coverage",
-    "coverageReporters": ["html", "text", "lcov"]
+    "coverageReporters": [
+      "html",
+      "text",
+      "lcov"
+    ]
   },
   "devDependencies": {
     "@babel/core": "^7.23.0",
@@ -52,6 +61,7 @@
     "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
-    "hls.js": "^1.4.12"
+    "hls.js": "^1.4.12",
+    "jest-environment-jsdom": "^30.4.1"
   }
 }

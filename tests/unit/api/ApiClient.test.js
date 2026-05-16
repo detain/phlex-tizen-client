@@ -2,7 +2,7 @@
  * ApiClient Unit Tests
  */
 
-import { ApiClient, ApiError } from '../../app/js/api/ApiClient.js';
+import { ApiClient, ApiError } from '../../../app/js/api/ApiClient.js';
 
 describe('ApiClient', () => {
     let apiClient;

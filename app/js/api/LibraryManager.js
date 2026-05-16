@@ -45,7 +45,7 @@ class LibraryManager {
             const data = await api.getLibraryItems(libraryId, options);
             this.cache.set(cacheKey, {
                 data,
-                timestamp: Date.now()
+                timestamp: Date.now(),
             });
             return data;
         } catch (error) {
@@ -69,7 +69,7 @@ class LibraryManager {
             const data = await api.getItem(itemId);
             this.cache.set(cacheKey, {
                 data,
-                timestamp: Date.now()
+                timestamp: Date.now(),
             });
             return data;
         } catch (error) {

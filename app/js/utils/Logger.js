@@ -7,7 +7,7 @@ const Logger = {
         DEBUG: 0,
         INFO: 1,
         WARN: 2,
-        ERROR: 3
+        ERROR: 3,
     },
 
     currentLevel: 0, // DEBUG
@@ -36,7 +36,9 @@ const Logger = {
      * Log debug message
      */
     debug(message, data) {
-        if (this.currentLevel > this.levels.DEBUG) return;
+        if (this.currentLevel > this.levels.DEBUG) {
+            return;
+        }
         console.debug(this.format('DEBUG', message, data));
     },
 
@@ -44,7 +46,9 @@ const Logger = {
      * Log info message
      */
     info(message, data) {
-        if (this.currentLevel > this.levels.INFO) return;
+        if (this.currentLevel > this.levels.INFO) {
+            return;
+        }
         console.info(this.format('INFO', message, data));
     },
 
@@ -52,7 +56,9 @@ const Logger = {
      * Log warning message
      */
     warn(message, data) {
-        if (this.currentLevel > this.levels.WARN) return;
+        if (this.currentLevel > this.levels.WARN) {
+            return;
+        }
         console.warn(this.format('WARN', message, data));
     },
 
@@ -61,7 +67,7 @@ const Logger = {
      */
     error(message, data) {
         console.error(this.format('ERROR', message, data));
-    }
+    },
 };
 
 export default Logger;

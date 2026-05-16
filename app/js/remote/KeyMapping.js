@@ -12,8 +12,8 @@ const KeyMapping = {
         39: 'RIGHT',
         40: 'DOWN',
         13: 'ENTER',
-        10009: 'BACK',        // Samsung back button
-        36: 'HOME',           // Home button
+        10009: 'BACK', // Samsung back button
+        36: 'HOME', // Home button
 
         // Playback control
         415: 'PLAY',
@@ -72,7 +72,7 @@ const KeyMapping = {
             'LEFT', 'UP', 'RIGHT', 'DOWN',
             'FAST_FORWARD', 'REWIND',
             'NEXT', 'PREVIOUS',
-            'VOLUME_UP', 'VOLUME_DOWN'
+            'VOLUME_UP', 'VOLUME_DOWN',
         ];
         return repeatableActions.includes(action);
     },
@@ -85,7 +85,7 @@ const KeyMapping = {
             'ENTER', 'BACK', 'HOME',
             'PLAY', 'STOP', 'PAUSE',
             'RED', 'GREEN', 'YELLOW', 'BLUE',
-            'MUTE', 'MENU', 'INFO', 'TOOLS'
+            'MUTE', 'MENU', 'INFO', 'TOOLS',
         ];
         return immediateActions.includes(action);
     },
@@ -127,10 +127,10 @@ const KeyMapping = {
             'MENU': 'Menu',
             'INFO': 'Info',
             'TOOLS': 'Tools',
-            'PLAY_PAUSE': 'Play/Pause'
+            'PLAY_PAUSE': 'Play/Pause',
         };
         return displayNames[action] || action;
-    }
+    },
 };
 
 export default KeyMapping;

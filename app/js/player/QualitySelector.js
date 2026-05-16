@@ -61,7 +61,7 @@ class QualitySelector {
             return {
                 index: -1,
                 name: 'Auto',
-                isAuto: true
+                isAuto: true,
             };
         }
 
@@ -87,7 +87,9 @@ class QualitySelector {
     }
 
     emit(event, data) {
-        if (!this.listeners.has(event)) return;
+        if (!this.listeners.has(event)) {
+            return;
+        }
         this.listeners.get(event).forEach(callback => callback(data));
     }
 }

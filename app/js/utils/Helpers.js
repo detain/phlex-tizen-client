@@ -7,7 +7,9 @@ const Helpers = {
      * Format duration from ticks to readable string
      */
     formatDuration(ticks) {
-        if (!ticks) return '';
+        if (!ticks) {
+            return '';
+        }
         const hours = Math.floor(ticks / 36000000000);
         const minutes = Math.floor((ticks % 36000000000) / 600000000);
 
@@ -21,7 +23,9 @@ const Helpers = {
      * Format seconds to time string (HH:MM:SS or MM:SS)
      */
     formatTime(seconds) {
-        if (!seconds || isNaN(seconds)) return '00:00';
+        if (seconds === null || seconds === undefined || isNaN(seconds)) {
+            return '00:00';
+        }
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
         const s = Math.floor(seconds % 60);
@@ -36,7 +40,9 @@ const Helpers = {
      * Escape HTML entities
      */
     escapeHtml(text) {
-        if (!text) return '';
+        if (!text) {
+            return '';
+        }
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
@@ -65,18 +71,25 @@ const Helpers = {
     },
 
     /**
-     * Throttle function
+     * Throttle function - leading edge, one trailing call
      */
     throttle(func, limit) {
-        let inThrottle;
+        let lastTime = 0;
+        let scheduledId = null;
         return function executedFunction(...args) {
-            if (!inThrottle) {
+            const now = Date.now();
+            if (now - lastTime >= limit) {
                 func(...args);
-                inThrottle = true;
-                setTimeout(() => inThrottle = false, limit);
+                lastTime = now;
+            } else if (!scheduledId) {
+                scheduledId = setTimeout(() => {
+                    func(...args);
+                    lastTime = Date.now();
+                    scheduledId = null;
+                }, limit);
             }
         };
-    }
+    },
 };
 
 export default Helpers;

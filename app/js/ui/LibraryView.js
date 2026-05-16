@@ -3,7 +3,6 @@
  * Displays items within a library
  */
 
-import api from '../api/ApiClient.js';
 import libraryManager from '../api/LibraryManager.js';
 import Logger from '../utils/Logger.js';
 import Helpers from '../utils/Helpers.js';
@@ -78,7 +77,7 @@ class LibraryView {
      * Get library name from first item or ID
      */
     getLibraryName() {
-        const library = this.items[0]?.ParentId || this.libraryId;
+        // Note: library name resolution if needed in future
         return 'Library';
     }
 
@@ -106,7 +105,7 @@ class LibraryView {
             MusicAlbum: '🎵',
             Audio: '🎵',
             Book: '📚',
-            Photo: '🖼️'
+            Photo: '🖼️',
         };
         return icons[type] || '📁';
     }
@@ -124,7 +123,7 @@ class LibraryView {
         });
 
         // Item selection
-        items.forEach((item, index) => {
+        items.forEach((item, _index) => {
             item.addEventListener('click', () => {
                 this.selectItem(item.dataset.id);
             });

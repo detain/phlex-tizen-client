@@ -16,7 +16,7 @@ class SubtitleRenderer {
             backgroundColor: 'rgba(0, 0, 0, 0.75)',
             textAlign: 'center',
             padding: '8px 16px',
-            borderRadius: 4
+            borderRadius: 4,
         };
     }
 
@@ -71,7 +71,7 @@ class SubtitleRenderer {
                 index: i,
                 language: track.language,
                 label: track.label || track.language,
-                mode: track.mode
+                mode: track.mode,
             });
         }
 
@@ -83,7 +83,9 @@ class SubtitleRenderer {
      */
     enableTrack(trackIndex) {
         const video = document.querySelector('video');
-        if (!video) return;
+        if (!video) {
+            return;
+        }
 
         for (let i = 0; i < video.textTracks.length; i++) {
             video.textTracks[i].mode = (i === trackIndex) ? 'showing' : 'hidden';
@@ -106,7 +108,9 @@ class SubtitleRenderer {
      */
     async loadExternalSubtitles(url) {
         const video = document.querySelector('video');
-        if (!video) return;
+        if (!video) {
+            return;
+        }
 
         // Create track element
         const track = document.createElement('track');
@@ -135,7 +139,9 @@ class SubtitleRenderer {
      * Show subtitle cue
      */
     showCue(text, startTime, endTime) {
-        if (!this.cueElement) return;
+        if (!this.cueElement) {
+            return;
+        }
 
         this.cueElement.textContent = text;
         this.cueElement.style.display = 'block';
@@ -146,7 +152,9 @@ class SubtitleRenderer {
      * Hide current cue
      */
     hideCue() {
-        if (!this.cueElement) return;
+        if (!this.cueElement) {
+            return;
+        }
         this.cueElement.style.display = 'none';
         this.activeCue = null;
     }
@@ -154,7 +162,7 @@ class SubtitleRenderer {
     /**
      * Update subtitle display based on time
      */
-    update(currentTime) {
+    update(_currentTime) {
         // Subtitle handling is done by native video element
         // This is for custom subtitle rendering if needed
     }

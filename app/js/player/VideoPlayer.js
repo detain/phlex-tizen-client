@@ -23,7 +23,7 @@ class VideoPlayer {
         this.bufferSettings = {
             maxBufferLength: 30,
             maxVideoBufferLength: 60,
-            maxAudioBufferLength: 30
+            maxAudioBufferLength: 30,
         };
     }
 
@@ -42,7 +42,9 @@ class VideoPlayer {
      * Configure player specifically for Tizen
      */
     configureForTizen() {
-        if (!this.video) return;
+        if (!this.video) {
+            return;
+        }
 
         // Enable buffering
         this.video.setAttribute('buffered-smooth', 'true');
@@ -71,7 +73,9 @@ class VideoPlayer {
      * Setup native video element events
      */
     setupEventListeners() {
-        if (!this.video) return;
+        if (!this.video) {
+            return;
+        }
 
         // Playback events
         this.video.addEventListener('play', () => this.onPlay());
@@ -102,7 +106,7 @@ class VideoPlayer {
 
         Logger.info('Loading video', {
             method: playbackInfo.method,
-            url: playbackInfo.url?.substring(0, 50) + '...'
+            url: playbackInfo.url?.substring(0, 50) + '...',
         });
 
         this.currentSource = playbackInfo;
@@ -153,7 +157,7 @@ class VideoPlayer {
 
             // Error handling
             recoverAttempts: 5,
-            onErrorRecover: true
+            onErrorRecover: true,
         });
 
         // Load HLS playlist
@@ -168,12 +172,12 @@ class VideoPlayer {
                     height: level.height,
                     width: level.width,
                     bitrate: level.bitrate,
-                    name: `${level.height}p`
+                    name: `${level.height}p`,
                 }));
 
                 Logger.info('HLS loaded', {
                     levels: this.qualityLevels.length,
-                    startLevel: this.hlsPlayer.startLevel
+                    startLevel: this.hlsPlayer.startLevel,
                 });
 
                 resolve();
@@ -196,7 +200,7 @@ class VideoPlayer {
     /**
      * Load direct file
      */
-    async loadDirect(url, playbackInfo) {
+    async loadDirect(url, _playbackInfo) {
         return new Promise((resolve, reject) => {
             this.video.addEventListener('loadedmetadata', () => {
                 resolve();
@@ -215,7 +219,9 @@ class VideoPlayer {
      * Start playback
      */
     async play() {
-        if (!this.video) return;
+        if (!this.video) {
+            return;
+        }
 
         try {
             await this.video.play();
@@ -230,7 +236,9 @@ class VideoPlayer {
      * Pause playback
      */
     pause() {
-        if (!this.video) return;
+        if (!this.video) {
+            return;
+        }
         this.video.pause();
     }
 
@@ -238,7 +246,9 @@ class VideoPlayer {
      * Stop playback
      */
     stop() {
-        if (!this.video) return;
+        if (!this.video) {
+            return;
+        }
 
         this.video.pause();
         this.video.currentTime = 0;
@@ -257,7 +267,9 @@ class VideoPlayer {
      * Seek to position
      */
     async seek(positionSeconds) {
-        if (!this.video) return;
+        if (!this.video) {
+            return;
+        }
 
         // Clamp to valid range
         const clampedPosition = Math.max(0, Math.min(positionSeconds, this.video.duration));
@@ -276,7 +288,9 @@ class VideoPlayer {
      * Set playback rate
      */
     setPlaybackRate(rate) {
-        if (!this.video) return;
+        if (!this.video) {
+            return;
+        }
         this.video.playbackRate = rate;
     }
 
@@ -284,7 +298,9 @@ class VideoPlayer {
      * Set volume
      */
     setVolume(volume) {
-        if (!this.video) return;
+        if (!this.video) {
+            return;
+        }
         this.video.volume = Math.max(0, Math.min(1, volume));
     }
 
@@ -292,7 +308,9 @@ class VideoPlayer {
      * Set quality level
      */
     setQuality(qualityIndex) {
-        if (!this.hlsPlayer) return;
+        if (!this.hlsPlayer) {
+            return;
+        }
 
         if (qualityIndex === -1) {
             // Auto quality
@@ -306,7 +324,7 @@ class VideoPlayer {
 
         Logger.info('Quality changed', {
             index: qualityIndex,
-            quality: this.currentQuality
+            quality: this.currentQuality,
         });
 
         this.emit('qualityChanged', this.currentQuality);
@@ -316,7 +334,9 @@ class VideoPlayer {
      * Set subtitle track
      */
     setSubtitleTrack(trackIndex) {
-        if (!this.video) return;
+        if (!this.video) {
+            return;
+        }
 
         if (trackIndex === -1) {
             // Disable subtitles
@@ -356,7 +376,9 @@ class VideoPlayer {
      * Get buffered percentage
      */
     getBufferedPercentage() {
-        if (!this.video || !this.video.buffered.length) return 0;
+        if (!this.video || !this.video.buffered.length) {
+            return 0;
+        }
         return (this.video.buffered.end(this.video.buffered.length - 1) / this.video.duration) * 100;
     }
 
@@ -393,7 +415,7 @@ class VideoPlayer {
         this.emit('loadedmetadata', {
             duration: this.video.duration,
             width: this.video.videoWidth,
-            height: this.video.videoHeight
+            height: this.video.videoHeight,
         });
     }
 
@@ -401,13 +423,13 @@ class VideoPlayer {
         this.emit('timeupdate', {
             currentTime: this.video.currentTime,
             duration: this.video.duration,
-            position: this.getCurrentTimeTicks()
+            position: this.getCurrentTimeTicks(),
         });
     }
 
     onProgress() {
         this.emit('progress', {
-            buffered: this.getBufferedPercentage()
+            buffered: this.getBufferedPercentage(),
         });
     }
 
@@ -430,14 +452,20 @@ class VideoPlayer {
     }
 
     off(event, callback) {
-        if (!this.listeners.has(event)) return;
+        if (!this.listeners.has(event)) {
+            return;
+        }
         const callbacks = this.listeners.get(event);
         const index = callbacks.indexOf(callback);
-        if (index > -1) callbacks.splice(index, 1);
+        if (index > -1) {
+            callbacks.splice(index, 1);
+        }
     }
 
     emit(event, data) {
-        if (!this.listeners.has(event)) return;
+        if (!this.listeners.has(event)) {
+            return;
+        }
         this.listeners.get(event).forEach(callback => callback(data));
     }
 

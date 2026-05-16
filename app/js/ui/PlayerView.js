@@ -310,7 +310,9 @@ class PlayerView {
      */
     cycleQuality() {
         const levels = videoPlayer.qualityLevels || [];
-        if (levels.length === 0) return;
+        if (levels.length === 0) {
+            return;
+        }
 
         let currentIndex = videoPlayer.currentQualityIndex;
         const nextIndex = (currentIndex + 1) % (levels.length + 1); // +1 for auto

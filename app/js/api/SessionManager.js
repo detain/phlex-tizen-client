@@ -4,7 +4,6 @@
  */
 
 import api from './ApiClient.js';
-import Storage from '../utils/Storage.js';
 import Logger from '../utils/Logger.js';
 
 class SessionManager {
@@ -54,7 +53,7 @@ class SessionManager {
     async startPlayback(itemId, options = {}) {
         const playbackInfo = await api.playItem(itemId, {
             startPosition: options.startPosition || 0,
-            mediaSourceId: options.mediaSourceId
+            mediaSourceId: options.mediaSourceId,
         });
 
         this.playbackState = {
@@ -65,7 +64,7 @@ class SessionManager {
             duration: playbackInfo.media_item?.run_time_ticks || 0,
             streamUrl: playbackInfo.playback_info?.url,
             method: playbackInfo.playback_info?.method,
-            startTime: Date.now()
+            startTime: Date.now(),
         };
 
         this.startProgressReporting();
@@ -78,7 +77,9 @@ class SessionManager {
      * Stop playback
      */
     async stopPlayback() {
-        if (!this.playbackState) return;
+        if (!this.playbackState) {
+            return;
+        }
 
         // Report final progress
         await this.reportProgress(true);
@@ -98,7 +99,9 @@ class SessionManager {
      * Pause playback
      */
     async pausePlayback() {
-        if (!this.playbackState || !this.playbackState.isPlaying) return;
+        if (!this.playbackState || !this.playbackState.isPlaying) {
+            return;
+        }
 
         try {
             await api.pausePlayback();
@@ -114,7 +117,9 @@ class SessionManager {
      * Resume playback
      */
     async resumePlayback() {
-        if (!this.playbackState || this.playbackState.isPlaying) return;
+        if (!this.playbackState || this.playbackState.isPlaying) {
+            return;
+        }
 
         try {
             await api.resumePlayback();
@@ -130,7 +135,9 @@ class SessionManager {
      * Seek to position
      */
     async seekTo(positionTicks) {
-        if (!this.playbackState) return;
+        if (!this.playbackState) {
+            return;
+        }
 
         try {
             await api.seekPlayback(positionTicks);
@@ -147,7 +154,9 @@ class SessionManager {
      * Report playback progress
      */
     async reportProgress(force = false) {
-        if (!this.playbackState) return;
+        if (!this.playbackState) {
+            return;
+        }
 
         const currentPosition = this.calculateCurrentPosition();
 
@@ -172,7 +181,9 @@ class SessionManager {
      * Calculate current position based on elapsed time
      */
     calculateCurrentPosition() {
-        if (!this.playbackState) return 0;
+        if (!this.playbackState) {
+            return 0;
+        }
 
         if (this.playbackState.isPlaying) {
             const elapsed = Date.now() - this.playbackState.startTime;
@@ -190,7 +201,9 @@ class SessionManager {
      * Start heartbeat to keep session alive
      */
     startHeartbeat() {
-        if (this.heartbeatInterval) return;
+        if (this.heartbeatInterval) {
+            return;
+        }
 
         // Heartbeat every 30 seconds
         this.heartbeatInterval = setInterval(async () => {
@@ -216,7 +229,9 @@ class SessionManager {
      * Start progress reporting
      */
     startProgressReporting() {
-        if (this.progressReportingInterval) return;
+        if (this.progressReportingInterval) {
+            return;
+        }
 
         // Report progress every 10 seconds
         this.progressReportingInterval = setInterval(() => {
@@ -245,7 +260,9 @@ class SessionManager {
     }
 
     off(event, callback) {
-        if (!this.listeners.has(event)) return;
+        if (!this.listeners.has(event)) {
+            return;
+        }
         const callbacks = this.listeners.get(event);
         const index = callbacks.indexOf(callback);
         if (index > -1) {
@@ -254,7 +271,9 @@ class SessionManager {
     }
 
     emit(event, data) {
-        if (!this.listeners.has(event)) return;
+        if (!this.listeners.has(event)) {
+            return;
+        }
         this.listeners.get(event).forEach(callback => callback(data));
     }
 

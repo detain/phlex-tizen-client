@@ -4,7 +4,6 @@
  */
 
 import Storage from '../utils/Storage.js';
-import Logger from '../utils/Logger.js';
 
 class ApiClient {
     constructor(baseUrl, deviceId, deviceName) {
@@ -26,14 +25,14 @@ class ApiClient {
                 Container: 'mkv,mp4,webm',
                 Type: 'Video',
                 VideoCodec: 'h264,hevc,vp9',
-                AudioCodec: 'aac,ac3,eac3,dts,flac'
+                AudioCodec: 'aac,ac3,eac3,dts,flac',
             }],
             TranscodingProfiles: [{
                 Container: 'ts',
                 Type: 'Video',
                 VideoCodec: 'h264',
-                AudioCodec: 'aac,ac3'
-            }]
+                AudioCodec: 'aac,ac3',
+            }],
         };
 
         // Request queue for rate limiting
@@ -101,7 +100,7 @@ class ApiClient {
             'Content-Type': 'application/json',
             'X-Phlex-Device-ID': this.deviceId,
             'X-Phlex-Device-Name': this.deviceName,
-            'X-Phlex-Device-Type': this.deviceType
+            'X-Phlex-Device-Type': this.deviceType,
         };
 
         if (this.token) {
@@ -115,7 +114,7 @@ class ApiClient {
         const config = {
             method,
             headers,
-            mode: 'cors'
+            mode: 'cors',
         };
 
         if (body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
@@ -159,13 +158,13 @@ class ApiClient {
         const deviceInfo = {
             device_id: this.deviceId,
             device_name: this.deviceName,
-            device_type: this.deviceType
+            device_type: this.deviceType,
         };
 
         const result = await this.request('POST', '/Auth/Login', {
             username,
             password,
-            ...deviceInfo
+            ...deviceInfo,
         });
 
         this.setToken(result.token);
@@ -179,7 +178,7 @@ class ApiClient {
         const result = await this.request('POST', '/Auth/Register', {
             email,
             username,
-            password
+            password,
         });
 
         return result;
@@ -209,7 +208,7 @@ class ApiClient {
             device_id: this.deviceId,
             device_name: this.deviceName,
             device_type: this.deviceType,
-            capabilities: this.deviceProfile
+            capabilities: this.deviceProfile,
         };
 
         const result = await this.request('POST', '/Sessions', deviceInfo);
@@ -236,7 +235,7 @@ class ApiClient {
             limit: options.limit || 50,
             startIndex: options.startIndex || 0,
             sortBy: options.sortBy || 'SortName',
-            sortOrder: options.sortOrder || 'Ascending'
+            sortOrder: options.sortOrder || 'Ascending',
         });
 
         return this.request('GET', `/Items?${params}`);
@@ -246,10 +245,10 @@ class ApiClient {
         return this.request('GET', `/Items/${itemId}`);
     }
 
-    async getItemPlaybackInfo(itemId, options = {}) {
+    async getItemPlaybackInfo(itemId, _options = {}) {
         const params = new URLSearchParams({
             deviceProfile: this.deviceType,
-            maxStreamingBitrate: this.deviceProfile.MaxStreamingBitrate
+            maxStreamingBitrate: this.deviceProfile.MaxStreamingBitrate,
         });
 
         return this.request('GET', `/Items/${itemId}/PlaybackInfo?${params}`);
@@ -262,7 +261,7 @@ class ApiClient {
         const params = new URLSearchParams({
             searchTerm: query,
             limit: options.limit || 20,
-            includeItemTypes: options.types || 'Movie,Series,Music'
+            includeItemTypes: options.types || 'Movie,Series,Music',
         });
 
         return this.request('GET', `/Search/Hints?${params}`);
@@ -297,7 +296,7 @@ class ApiClient {
             item_id: itemId,
             start_position_ticks: startPosition,
             device_profile: this.deviceType,
-            media_source_id: options.mediaSourceId
+            media_source_id: options.mediaSourceId,
         });
 
         return result;
@@ -306,21 +305,21 @@ class ApiClient {
     async stopPlayback() {
         return this.request('POST', '/Playstate', {
             session_id: this.sessionId,
-            command: 'stop'
+            command: 'stop',
         });
     }
 
     async pausePlayback() {
         return this.request('POST', '/Playstate', {
             session_id: this.sessionId,
-            command: 'pause'
+            command: 'pause',
         });
     }
 
     async resumePlayback() {
         return this.request('POST', '/Playstate', {
             session_id: this.sessionId,
-            command: 'play'
+            command: 'play',
         });
     }
 
@@ -328,7 +327,7 @@ class ApiClient {
         return this.request('POST', '/Playstate', {
             session_id: this.sessionId,
             command: 'seek',
-            data: { position_ticks: positionTicks }
+            data: { position_ticks: positionTicks },
         });
     }
 
@@ -336,7 +335,7 @@ class ApiClient {
         return this.request('POST', '/Playstate/Progress', {
             session_id: this.sessionId,
             position_ticks: positionTicks,
-            is_paused: isPaused
+            is_paused: isPaused,
         });
     }
 
@@ -369,7 +368,9 @@ class ApiError extends Error {
  */
 function generateDeviceId() {
     const stored = Storage.get('device_id');
-    if (stored) return stored;
+    if (stored) {
+        return stored;
+    }
 
     const id = 'tizen-' + Math.random().toString(36).substr(2, 9) +
                '-' + Math.random().toString(36).substr(2, 9);

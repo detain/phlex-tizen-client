@@ -19,7 +19,9 @@ class PlayerRemoteHandler {
      * Activate player remote handling
      */
     activate() {
-        if (this.isActive) return;
+        if (this.isActive) {
+            return;
+        }
 
         this.isActive = true;
         remoteManager.setEnabled(false); // Disable global handling
@@ -33,7 +35,9 @@ class PlayerRemoteHandler {
      * Deactivate player remote handling
      */
     deactivate() {
-        if (!this.isActive) return;
+        if (!this.isActive) {
+            return;
+        }
 
         this.isActive = false;
         remoteManager.setEnabled(true); // Re-enable global handling
@@ -46,53 +50,53 @@ class PlayerRemoteHandler {
      */
     handleAction({ key, repeat }) {
         switch (key) {
-            case 'PLAY':
-                this.handlePlay();
-                break;
-            case 'PAUSE':
-                this.handlePause();
-                break;
-            case 'STOP':
-                this.handleStop();
-                break;
-            case 'PLAY_PAUSE':
-                this.handlePlayPause();
-                break;
-            case 'FAST_FORWARD':
-                this.handleSeekForward(repeat);
-                break;
-            case 'REWIND':
-                this.handleSeekBackward(repeat);
-                break;
-            case 'LEFT':
-                this.handleSeekBackward(repeat ? 30 : this.seekStep);
-                break;
-            case 'RIGHT':
-                this.handleSeekForward(repeat ? 30 : this.seekStep);
-                break;
-            case 'UP':
-                this.handleVolumeUp(repeat);
-                break;
-            case 'DOWN':
-                this.handleVolumeDown(repeat);
-                break;
-            case 'BACK':
-                this.handleBack();
-                break;
-            case 'INFO':
-                this.handleToggleInfo();
-                break;
-            case 'RED':
-                this.handleToggleSubtitles();
-                break;
-            case 'GREEN':
-                this.handleToggleAudioTracks();
-                break;
-            case 'YELLOW':
-                this.handleToggleQuality();
-                break;
-            default:
-                Logger.debug('Unhandled player action', { key });
+        case 'PLAY':
+            this.handlePlay();
+            break;
+        case 'PAUSE':
+            this.handlePause();
+            break;
+        case 'STOP':
+            this.handleStop();
+            break;
+        case 'PLAY_PAUSE':
+            this.handlePlayPause();
+            break;
+        case 'FAST_FORWARD':
+            this.handleSeekForward(repeat);
+            break;
+        case 'REWIND':
+            this.handleSeekBackward(repeat);
+            break;
+        case 'LEFT':
+            this.handleSeekBackward(repeat ? 30 : this.seekStep);
+            break;
+        case 'RIGHT':
+            this.handleSeekForward(repeat ? 30 : this.seekStep);
+            break;
+        case 'UP':
+            this.handleVolumeUp(repeat);
+            break;
+        case 'DOWN':
+            this.handleVolumeDown(repeat);
+            break;
+        case 'BACK':
+            this.handleBack();
+            break;
+        case 'INFO':
+            this.handleToggleInfo();
+            break;
+        case 'RED':
+            this.handleToggleSubtitles();
+            break;
+        case 'GREEN':
+            this.handleToggleAudioTracks();
+            break;
+        case 'YELLOW':
+            this.handleToggleQuality();
+            break;
+        default:
+            Logger.debug('Unhandled player action', { key });
         }
     }
 
@@ -101,7 +105,9 @@ class PlayerRemoteHandler {
      */
     async handlePlay() {
         const state = sessionManager.playbackState;
-        if (state?.isPlaying) return;
+        if (state?.isPlaying) {
+            return;
+        }
 
         try {
             await sessionManager.resumePlayback();
@@ -116,7 +122,9 @@ class PlayerRemoteHandler {
      */
     async handlePause() {
         const state = sessionManager.playbackState;
-        if (!state?.isPlaying) return;
+        if (!state?.isPlaying) {
+            return;
+        }
 
         try {
             await sessionManager.pausePlayback();

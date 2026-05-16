@@ -75,7 +75,7 @@ class App {
      * Setup session manager events
      */
     setupSessionEvents() {
-        sessionManager.on('playbackStarted', (data) => {
+        sessionManager.on('playbackStarted', (_data) => {
             PlayerRemoteHandler.activate();
         });
 
@@ -157,7 +157,9 @@ class App {
      */
     showView(viewName) {
         const view = this.views.get(viewName);
-        if (!view) return;
+        if (!view) {
+            return;
+        }
 
         // Hide current view
         if (this.currentView) {
