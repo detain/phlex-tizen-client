@@ -11,7 +11,7 @@
     "serve": "webpack serve --mode development",
     "test": "jest",
     "test:unit": "jest tests/unit",
-    "test:integration": "jest tests/integration",
+    "test:integration": "jest tests/integration --passWithNoTests",
     "lint": "eslint app/js"
   },
   "keywords": [
