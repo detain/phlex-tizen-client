@@ -31,6 +31,7 @@ Phlex Tizen is a native Samsung Smart TV application that connects to a Phlex Me
 - **Search**: Search across your media library
 - **Favorites**: Mark items as favorites
 - **Watch History**: Track watched items
+- **Hub Mode**: Connect to a Phlex Hub to access and manage claimed servers with direct-LAN or relay-based routing
 
 ## Prerequisites
 
