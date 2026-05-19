@@ -32,6 +32,7 @@ Phlex Tizen is a native Samsung Smart TV application that connects to a Phlex Me
 - **Favorites**: Mark items as favorites
 - **Watch History**: Track watched items
 - **Hub Mode**: Connect to a Phlex Hub to access and manage claimed servers with direct-LAN or relay-based routing
+- **SyncPlay**: Watch together with friends and family with synchronized playback across multiple devices
 
 ## Prerequisites
 
@@ -291,6 +292,8 @@ phlex-tizen/
 │   │   │   ├── LibraryView.js
 │   │   │   ├── DetailView.js
 │   │   │   └── PlayerView.js
+│   │   ├── syncplay/         # SyncPlay synchronized playback
+│   │   │   └── SyncPlayService.js
 │   │   ├── config/          # Configuration
 │   │   │   └── constants.js
 │   │   └── utils/           # Utility functions
@@ -313,6 +316,8 @@ phlex-tizen/
 │       │   └── ApiClient.test.js
 │       ├── remote/
 │       │   └── KeyMapping.test.js
+│       ├── syncplay/
+│       │   └── SyncPlayService.test.js
 │       └── utils/
 │           └── Helpers.test.js
 ├── .github/
