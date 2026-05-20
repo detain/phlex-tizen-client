@@ -23,6 +23,10 @@
   ],
   "author": "Phlix",
   "license": "MIT",
+  "repository": {
+    "url": "https://github.com/detain/phlix-tizen-client"
+  },
+  "homepage": "https://github.com/detain/phlix-tizen-client",
   "jest": {
     "testEnvironment": "jsdom",
     "transform": {

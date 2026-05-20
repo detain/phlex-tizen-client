@@ -5,7 +5,7 @@ description: Adds a new server endpoint as a method on `app/js/api/ApiClient.js`
 
 # API Endpoint
 
-Add a new Phlex server endpoint by writing a method on `ApiClient`, then surfacing it through the right manager. Views must never call `fetch` directly — they go view → manager → `ApiClient.request()`.
+Add a new Phlix server endpoint by writing a method on `ApiClient`, then surfacing it through the right manager. Views must never call `fetch` directly — they go view → manager → `ApiClient.request()`.
 
 ## Critical
 
