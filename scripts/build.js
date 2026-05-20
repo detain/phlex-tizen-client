@@ -1,5 +1,5 @@
 /**
- * Build script for Phlex Tizen App
+ * Build script for Phlix Tizen App
  */
 
 const webpack = require('webpack');

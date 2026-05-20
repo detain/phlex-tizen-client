@@ -5,7 +5,7 @@ description: Adds a new server endpoint as a method on `app/js/api/ApiClient.js`
 
 # API Endpoint
 
-Add a new Phlex server endpoint by writing a method on `ApiClient`, then surfacing it through the right manager. Views must never call `fetch` directly — they go view → manager → `ApiClient.request()`.
+Add a new Phlix server endpoint by writing a method on `ApiClient`, then surfacing it through the right manager. Views must never call `fetch` directly — they go view → manager → `ApiClient.request()`.
 
 ## Critical
 
@@ -58,7 +58,7 @@ Add a new Phlex server endpoint by writing a method on `ApiClient`, then surfaci
    }
    ```
 
-   Naming: lowerCamelCase, verb-first (`get*`, `create*`, `update*`, `delete*`, `mark*`, `toggle*`, `report*`). Body keys are `snake_case` to match the Phlex server (see `playItem`, `reportPlaybackProgress`).
+   Naming: lowerCamelCase, verb-first (`get*`, `create*`, `update*`, `delete*`, `mark*`, `toggle*`, `report*`). Body keys are `snake_case` to match the Phlix server (see `playItem`, `reportPlaybackProgress`).
 
    Verify before proceeding: re-open `ApiClient.js` and confirm the new method sits inside the `class ApiClient { … }` block and uses `this.request(...)`.
 
@@ -155,7 +155,7 @@ Result: View code can call `library.getNextUp(seriesId, { limit: 5 })`; failures
 
 - **`TypeError: this.request is not a function`** — your method is defined outside the `class ApiClient { … }` block (often after the closing brace, near `class ApiError`). Move it back inside the class body.
 - **`SyntaxError: Unexpected token in JSON`** at the `JSON.parse(text)` line in `request()` — server returned HTML (often a 502 from a misconfigured proxy) but with a 2xx status. Confirm the path begins with `/` and does not double the `/api/v1` prefix.
-- **Request hangs ~30s then throws `ApiError(408, 'Request timeout')`** — server URL is wrong or CORS preflight is failing silently. Check that `app/config.xml` lists the server origin under `<access origin="..." />` and that the Phlex server CORS allowlist includes the TV.
+- **Request hangs ~30s then throws `ApiError(408, 'Request timeout')`** — server URL is wrong or CORS preflight is failing silently. Check that `app/config.xml` lists the server origin under `<access origin="..." />` and that the Phlix server CORS allowlist includes the TV.
 - **`ApiError(401, ...)` on every call after login** — token was set but session was not. Confirm the login response shape is `{ token, session_id, user }`; if the field name differs, update the destructuring inside `ApiClient.login()` rather than papering over it in the new method.
 - **ESLint: `'_options' is defined but never used`** — intentional unused params must be `_`-prefixed (see `getItemPlaybackInfo(itemId, _options)`). Either prefix the arg or actually use it.
 - **Jest: `ReferenceError: fetch is not defined`** — jsdom does not provide `fetch`. Stub it per test: `global.fetch = jest.fn().mockResolvedValue({ ok: true, text: async () => '{}' });` and clear it in `afterEach`.

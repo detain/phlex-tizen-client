@@ -1,7 +1,7 @@
 {
-  "name": "phlex-tizen",
+  "name": "phlix-tizen",
   "version": "1.0.0",
-  "description": "Samsung Tizen TV client for Phlex Media Server",
+  "description": "Samsung Tizen TV client for Phlix Media Server",
   "main": "app/js/main.js",
   "type": "module",
   "scripts": {
@@ -15,14 +15,18 @@
     "lint": "eslint app/js"
   },
   "keywords": [
-    "phlex",
+    "phlix",
     "samsung",
     "tizen",
     "smarttv",
     "media-server"
   ],
-  "author": "Phlex",
+  "author": "Phlix",
   "license": "MIT",
+  "repository": {
+    "url": "https://github.com/detain/phlix-tizen-client"
+  },
+  "homepage": "https://github.com/detain/phlix-tizen-client",
   "jest": {
     "testEnvironment": "jsdom",
     "transform": {

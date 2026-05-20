@@ -79,7 +79,7 @@ class DetailView {
      * Render backdrop image
      */
     renderBackdrop(item) {
-        const serverUrl = window.PHLEX_SERVER_URL || 'http://localhost:8096';
+        const serverUrl = window.PHLIX_SERVER_URL || 'http://localhost:8096';
 
         if (item.BackdropImageTags?.length > 0) {
             return `<img src="${serverUrl}/Items/${item.Id}/Images/Backdrop/0"

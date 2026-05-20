@@ -1,10 +1,10 @@
-# Phlex Tizen - Developer Guide
+# Phlix Tizen - Developer Guide
 
-This document provides detailed information for developers working on the Phlex Tizen TV application.
+This document provides detailed information for developers working on the Phlix Tizen TV application.
 
 ## Architecture Overview
 
-The Phlex Tizen app follows a modular architecture with clear separation of concerns:
+The Phlix Tizen app follows a modular architecture with clear separation of concerns:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -221,8 +221,8 @@ ApiClient.request(method, path, body, options)
 ┌─ Add Headers ─────────────────────────────┐
 │  Content-Type: application/json          │
 │  Authorization: Bearer {token}          │
-│  X-Phlex-Device-ID: {deviceId}           │
-│  X-Phlex-Session-ID: {sessionId}         │
+│  X-Phlix-Device-ID: {deviceId}           │
+│  X-Phlix-Session-ID: {sessionId}         │
 └─────────────────────────────────────────┘
     │
     ▼
@@ -276,8 +276,8 @@ The ApiClient sends a device profile for playback decisions:
 
 ```bash
 # Clone and install
-git clone https://github.com/detain/phlex-tizen.git
-cd phlex-tizen
+git clone https://github.com/detain/phlix-tizen.git
+cd phlix-tizen
 npm install
 ```
 
@@ -342,7 +342,7 @@ npm run build
 # Package for Tizen
 node scripts/package.js
 
-# Output: dist/org.phlex.phlextv.wgt
+# Output: dist/org.phlix.phlixtv.wgt
 ```
 
 ### Debugging
@@ -437,7 +437,7 @@ Enable detailed logging in `app/js/utils/Logger.js` or via `LOG_LEVEL` env var.
 
 ### Network Issues
 
-Check CORS configuration on Phlex server - TV must be allowed to make requests.
+Check CORS configuration on Phlix server - TV must be allowed to make requests.
 
 ### Playback Failures
 

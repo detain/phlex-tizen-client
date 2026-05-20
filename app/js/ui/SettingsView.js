@@ -139,13 +139,13 @@ class SettingsView {
                         <div class="setting-item">
                             <label class="setting-label">Server URL</label>
                             <input type="text" id="serverUrlInput" class="setting-input"
-                                   value="${window.PHLEX_SERVER_URL || 'http://localhost:8096'}">
+                                   value="${window.PHLIX_SERVER_URL || 'http://localhost:8096'}">
                         </div>
 
                         <div class="setting-item">
                             <label class="setting-label">Device Name</label>
                             <input type="text" id="deviceNameInput" class="setting-input"
-                                   value="${window.PHLEX_DEVICE_NAME || 'Samsung Tizen TV'}">
+                                   value="${window.PHLIX_DEVICE_NAME || 'Samsung Tizen TV'}">
                         </div>
                     </div>
                 </div>

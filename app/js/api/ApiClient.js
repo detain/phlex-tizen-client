@@ -1,6 +1,6 @@
 /**
- * Phlex API Client for Samsung Tizen TVs
- * Handles all communication with Phlex Media Server
+ * Phlix API Client for Samsung Tizen TVs
+ * Handles all communication with Phlix Media Server
  */
 
 import Storage from '../utils/Storage.js';
@@ -98,9 +98,9 @@ class ApiClient {
         const url = `${this.baseUrl}/api/v1${path}`;
         const headers = {
             'Content-Type': 'application/json',
-            'X-Phlex-Device-ID': this.deviceId,
-            'X-Phlex-Device-Name': this.deviceName,
-            'X-Phlex-Device-Type': this.deviceType,
+            'X-Phlix-Device-ID': this.deviceId,
+            'X-Phlix-Device-Name': this.deviceName,
+            'X-Phlix-Device-Type': this.deviceType,
         };
 
         if (this.token) {
@@ -108,7 +108,7 @@ class ApiClient {
         }
 
         if (this.sessionId) {
-            headers['X-Phlex-Session-ID'] = this.sessionId;
+            headers['X-Phlix-Session-ID'] = this.sessionId;
         }
 
         const config = {
@@ -380,8 +380,8 @@ function generateDeviceId() {
 
 // Export singleton instance
 const api = new ApiClient(
-    window.PHLEX_SERVER_URL || 'http://localhost:8096',
-    window.PHLEX_DEVICE_ID || generateDeviceId(),
+    window.PHLIX_SERVER_URL || 'http://localhost:8096',
+    window.PHLIX_DEVICE_ID || generateDeviceId(),
     'Samsung Tizen TV'
 );
 

@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Samsung Tizen TV client for Phlex Media Server. Vanilla JS (ES2022 modules) → webpack → Babel (Chrome 100 target) → Tizen 2.3+ Chromium TV browser. HLS via `hls.js`.
+Samsung Tizen TV client for Phlix Media Server. Vanilla JS (ES2022 modules) → webpack → Babel (Chrome 100 target) → Tizen 2.3+ Chromium TV browser. HLS via `hls.js`.
 
 ## Commands
 
@@ -56,7 +56,7 @@ Jest + jsdom (config in `package.json`). Tests mirror source at `tests/unit/<lay
 - **`package-lock.json` gitignored** — CI uses `npm install`, not `npm ci`. Don't switch.
 - **Mixed module systems**: `webpack.config.js` is ESM, but `scripts/build.js` · `scripts/debug.js` · `scripts/package.js` use CommonJS `require()` and fail under `"type": "module"` if invoked directly. Run via npm scripts; if editing one, rename to `.cjs` or port to ESM.
 - **`tests/integration/` directory does not exist** — `npm run test:integration` passes empty.
-- **App id mismatch**: `app/config.xml` uses `phlex.app.phlextizen`; `README.md` deploy example uses `org.phlex.phlextv`. `config.xml` is authoritative.
+- **App id mismatch**: `app/config.xml` uses `phlix.app.phlixtizen`; `README.md` deploy example uses `org.phlix.phlixtv`. `config.xml` is authoritative.
 - CI: `.github/workflows/test.yml` and `.github/workflows/lint.yml` run on push.
 
 See `DEVELOPER.md` for `ApiClient` method tree, device-profile shape, and view/route/endpoint/remote-key extension patterns.

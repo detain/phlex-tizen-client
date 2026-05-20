@@ -7,7 +7,7 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const PKG_NAME = 'phlex-tizen';
+const PKG_NAME = 'phlix-tizen';
 const VERSION = '1.0.0';
 
 const packageApp = () => {

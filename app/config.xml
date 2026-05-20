@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <widget xmlns="http://www.w3.org/ns/widgets"
         xmlns:tizen="http://tizen.org/ns/widgets"
-        id="http://phlex.app/phlextizen"
+        id="http://phlix.app/phlixtizen"
         version="1.0.0"
         viewmodes="maximized">
 
     <access origin="*" subdomains="*"></access>
-    <tizen:application id="phlex.app.phlextizen"
-                       package="phlex"
+    <tizen:application id="phlix.app.phlixtizen"
+                       package="phlix"
                        required_version="2.3"/>
 
     <content src="index.html"/>
     <icon src="icon.png"/>
-    <name>Phlex</name>
+    <name>Phlix</name>
     <tizen:privilege name="http://tizen.org/privilege/internet"/>
     <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
     <tizen:privilege name="http://tizen.org/privilege/tv.window"/>

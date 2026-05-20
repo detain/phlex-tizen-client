@@ -86,7 +86,7 @@ class LibraryView {
      */
     renderPoster(item) {
         if (item.ImageTags?.Primary) {
-            const serverUrl = window.PHLEX_SERVER_URL || 'http://localhost:8096';
+            const serverUrl = window.PHLIX_SERVER_URL || 'http://localhost:8096';
             return `<img src="${serverUrl}/Items/${item.Id}/Images/Primary"
                          alt="${Helpers.escapeHtml(item.Name)}"
                          loading="lazy">`;

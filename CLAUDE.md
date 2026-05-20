@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Samsung Tizen TV client for Phlex Media Server. Vanilla JS (ES2022 modules) → webpack → Babel (Chrome 100 target) → Tizen 2.3+ Chromium TV browser. Optional HLS via `hls.js`; everything else hand-rolled.
+Samsung Tizen TV client for Phlix Media Server. Vanilla JS (ES2022 modules) → webpack → Babel (Chrome 100 target) → Tizen 2.3+ Chromium TV browser. Optional HLS via `hls.js`; everything else hand-rolled.
 
 ## Commands
 
@@ -62,7 +62,7 @@ Jest + `jsdom`; config inline in `package.json`. Tests mirror source at `tests/u
 - **`package-lock.json` gitignored** — CI uses `npm install`. Don't switch back to `npm ci` without coordinating.
 - **Mixed module systems in tooling**: `webpack.config.js` is ESM but `scripts/build.js`, `scripts/debug.js`, `scripts/package.js` use CommonJS `require()`. They will fail under `"type": "module"` if run directly — invoke via npm scripts. If you touch a `scripts/*.js`, rename to `.cjs` or convert to ESM.
 - **`tests/integration/` is referenced but does not exist** — `npm run test:integration` passes with "no tests found."
-- **Tizen app id mismatch**: `app/config.xml` uses `phlex.app.phlextizen` while `README.md` deployment example uses `org.phlex.phlextv`. `config.xml` is authoritative.
+- **Tizen app id mismatch**: `app/config.xml` uses `phlix.app.phlixtizen` while `README.md` deployment example uses `org.phlix.phlixtv`. `config.xml` is authoritative.
 - `.github/workflows/test.yml` and `.github/workflows/lint.yml` run on push — keep them green.
 
 <!-- caliber:managed:pre-commit -->

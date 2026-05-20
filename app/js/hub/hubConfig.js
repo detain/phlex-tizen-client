@@ -47,14 +47,14 @@ const HubConfig = {
      */
     getEffectiveUrl(path) {
         if (!this.activeServerId || !this.servers.length) {
-            return (window.PHLEX_SERVER_URL || 'http://localhost:8096') + path;
+            return (window.PHLIX_SERVER_URL || 'http://localhost:8096') + path;
         }
 
         const server = this.servers.find(s => s.serverId === this.activeServerId);
         if (this.connectionMode === 'relay' && server?.relayHostname) {
             return `${this.hubUrl}/api/v1/relay/${server.serverId}${path}`;
         }
-        return (server?.hostname || window.PHLEX_SERVER_URL || 'http://localhost:8096') + path;
+        return (server?.hostname || window.PHLIX_SERVER_URL || 'http://localhost:8096') + path;
     },
 
     /**

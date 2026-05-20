@@ -277,7 +277,7 @@ class VideoPlayer {
     }
 
     /**
-     * Seek by ticks (100-nanosecond units used by Phlex)
+     * Seek by ticks (100-nanosecond units used by Phlix)
      */
     async seekToTicks(positionTicks) {
         const positionSeconds = positionTicks / 10000000;

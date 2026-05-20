@@ -26,7 +26,7 @@ class App {
      * Initialize the application
      */
     async init() {
-        Logger.info('Initializing Phlex TV App');
+        Logger.info('Initializing Phlix TV App');
 
         // Create views
         this.createViews();
@@ -110,7 +110,7 @@ class App {
         const loginHtml = `
             <div class="login-screen">
                 <div class="login-container">
-                    <h1 class="login-title">Phlex</h1>
+                    <h1 class="login-title">Phlix</h1>
                     <form class="login-form" id="loginForm">
                         <input type="text" class="login-input"
                                id="username" placeholder="Username"
