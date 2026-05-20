@@ -50,10 +50,10 @@ describe('HubConfig', () => {
     describe('getEffectiveUrl', () => {
         beforeEach(() => {
             // Setup default window global
-            window.PHLEX_SERVER_URL = 'http://localhost:8096';
+            window.PHLIX_SERVER_URL = 'http://localhost:8096';
         });
 
-        it('should return window.PHLEX_SERVER_URL when no active server', () => {
+        it('should return window.PHLIX_SERVER_URL when no active server', () => {
             HubConfig.servers = [];
             HubConfig.activeServerId = null;
 
@@ -90,7 +90,7 @@ describe('HubConfig', () => {
             expect(url).toBe('https://hub.example.com/api/v1/relay/server-1/api/v1/test');
         });
 
-        it('should fall back to window.PHLEX_SERVER_URL if server not found', () => {
+        it('should fall back to window.PHLIX_SERVER_URL if server not found', () => {
             HubConfig.servers = [{ serverId: 'other-server' }];
             HubConfig.activeServerId = 'non-existent';
 

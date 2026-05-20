@@ -4,7 +4,7 @@
 
 export default {
     // API Configuration
-    API_BASE_URL: window.PHLEX_SERVER_URL || 'http://localhost:8096',
+    API_BASE_URL: window.PHLIX_SERVER_URL || 'http://localhost:8096',
     API_VERSION: 'v1',
 
     // Device Configuration

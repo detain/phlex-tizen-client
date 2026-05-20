@@ -18,9 +18,9 @@ async function hubAwareRequest(method, path, body = null, options = {}) {
     // Build headers - start with base headers from api client
     const headers = {
         'Content-Type': 'application/json',
-        'X-Phlex-Device-ID': api.deviceId,
-        'X-Phlex-Device-Name': api.deviceName,
-        'X-Phlex-Device-Type': api.deviceType,
+        'X-Phlix-Device-ID': api.deviceId,
+        'X-Phlix-Device-Name': api.deviceName,
+        'X-Phlix-Device-Type': api.deviceType,
     };
 
     // Add session-based auth if available
@@ -29,7 +29,7 @@ async function hubAwareRequest(method, path, body = null, options = {}) {
     }
 
     if (api.sessionId) {
-        headers['X-Phlex-Session-ID'] = api.sessionId;
+        headers['X-Phlix-Session-ID'] = api.sessionId;
     }
 
     // In hub mode, use hub auth and server routing

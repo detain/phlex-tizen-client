@@ -41,7 +41,7 @@ class HomeView {
         const html = `
             <div class="home-view">
                 <div class="home-header">
-                    <h1 class="home-title">Phlex</h1>
+                    <h1 class="home-title">Phlix</h1>
                     <p class="home-subtitle">Your Media Library</p>
                 </div>
 

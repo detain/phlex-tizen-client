@@ -1,11 +1,11 @@
 /**
- * Phlex Tizen TV App - Main Entry Point
+ * Phlix Tizen TV App - Main Entry Point
  */
 
 import app from './ui/App.js';
 import Logger from './utils/Logger.js';
 
-Logger.info('Phlex Tizen App starting...');
+Logger.info('Phlix Tizen App starting...');
 
 // Export app instance for global access
 window.app = app;

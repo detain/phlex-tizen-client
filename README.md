@@ -1,6 +1,6 @@
-# Phlex Tizen TV App
+# Phlix Tizen TV App
 
-Samsung Smart TV client application for Phlex Media Server, built with Tizen SDK.
+Samsung Smart TV client application for Phlix Media Server, built with Tizen SDK.
 
 ## Table of Contents
 
@@ -17,21 +17,21 @@ Samsung Smart TV client application for Phlex Media Server, built with Tizen SDK
 
 ## Overview
 
-Phlex Tizen is a native Samsung Smart TV application that connects to a Phlex Media Server, allowing users to browse their media library and play content directly on their television. The app is built using vanilla JavaScript with webpack for bundling and supports both direct play and transcoded streaming via HLS.
+Phlix Tizen is a native Samsung Smart TV application that connects to a Phlix Media Server, allowing users to browse their media library and play content directly on their television. The app is built using vanilla JavaScript with webpack for bundling and supports both direct play and transcoded streaming via HLS.
 
 ## Features
 
-- **Library Browsing**: Browse movies, TV shows, music, and other media from Phlex
+- **Library Browsing**: Browse movies, TV shows, music, and other media from Phlix
 - **Video Playback**: Support for direct play and HLS streaming with quality selection
 - **Remote Control**: Full Samsung remote control support with intuitive navigation
-- **User Authentication**: Secure login with Phlex account credentials
+- **User Authentication**: Secure login with Phlix account credentials
 - **Progress Tracking**: Automatic resume from last playback position
 - **Subtitle Support**: Multiple subtitle tracks and languages
 - **Audio Tracks**: Multiple audio track selection
 - **Search**: Search across your media library
 - **Favorites**: Mark items as favorites
 - **Watch History**: Track watched items
-- **Hub Mode**: Connect to a Phlex Hub to access and manage claimed servers with direct-LAN or relay-based routing
+- **Hub Mode**: Connect to a Phlix Hub to access and manage claimed servers with direct-LAN or relay-based routing
 - **SyncPlay**: Watch together with friends and family with synchronized playback across multiple devices
 
 ## Prerequisites
@@ -48,9 +48,9 @@ Phlex Tizen is a native Samsung Smart TV application that connects to a Phlex Me
 - **Samsung TV SDK**: Tizen TV Extensions
 - **Samsung Smart TV**: 2016 model or newer (Tizen OS)
 
-### Phlex Media Server
+### Phlix Media Server
 
-- **Phlex Media Server**: Version 4.8 or higher
+- **Phlix Media Server**: Version 4.8 or higher
 - **Network**: TV and server must be on the same network
 
 ## Installation
@@ -58,8 +58,8 @@ Phlex Tizen is a native Samsung Smart TV application that connects to a Phlex Me
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/detain/phlex-tizen.git
-cd phlex-tizen
+git clone https://github.com/detain/phlix-tizen.git
+cd phlix-tizen
 ```
 
 ### 2. Install Dependencies
@@ -87,15 +87,15 @@ The app will be available at `http://localhost:8080`.
 Create or edit `tizen.env` in the project root:
 
 ```env
-PHLEX_SERVER_URL=http://192.168.1.100:8096
-PHLEX_DEVICE_NAME=Living Room TV
+PHLIX_SERVER_URL=http://192.168.1.100:8096
+PHLIX_DEVICE_NAME=Living Room TV
 LOG_LEVEL=info
 ```
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `PHLEX_SERVER_URL` | URL of your Phlex Media Server | `http://localhost:8096` |
-| `PHLEX_DEVICE_NAME` | Display name for this TV device | `Samsung Tizen TV` |
+| `PHLIX_SERVER_URL` | URL of your Phlix Media Server | `http://localhost:8096` |
+| `PHLIX_DEVICE_NAME` | Display name for this TV device | `Samsung Tizen TV` |
 | `LOG_LEVEL` | Logging verbosity | `info` |
 
 ### Tizen Configuration
@@ -180,7 +180,7 @@ npm run lint -- --fix
 
 2. **Import Project**
    - File → Import → Tizen → Tizen Project
-   - Select the `phlex-tizen` directory
+   - Select the `phlix-tizen` directory
    - Choose "TV" as the platform
 
 3. **Connect Device**
@@ -200,10 +200,10 @@ npm run build
 node scripts/package.js
 
 # Deploy via Tizen CLI
-tizen install -n dist/org.phlex.phlextv.wgt -t <TV_IP>
+tizen install -n dist/org.phlix.phlixtv.wgt -t <TV_IP>
 
 # Launch on TV
-tizen launch -n org.phlex.phlextv
+tizen launch -n org.phlix.phlixtv
 ```
 
 ### Option 3: Debugging
@@ -264,7 +264,7 @@ The app supports full Samsung remote control navigation:
 ## Project Structure
 
 ```
-phlex-tizen/
+phlix-tizen/
 ├── app/
 │   ├── index.html           # Main HTML entry point
 │   ├── config.xml           # Tizen configuration
@@ -336,7 +336,7 @@ phlex-tizen/
 
 1. Ensure your TV supports Tizen OS (2016+ models)
 2. Check that the TV is connected to the same network as the server
-3. Verify the Phlex Media Server is running and accessible
+3. Verify the Phlix Media Server is running and accessible
 
 ### Playback Issues
 
@@ -354,7 +354,7 @@ phlex-tizen/
 
 MIT License
 
-Copyright (c) 2024 Phlex
+Copyright (c) 2024 Phlix
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

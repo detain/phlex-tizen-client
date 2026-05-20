@@ -1,5 +1,5 @@
 /**
- * Debug launcher for Phlex Tizen App
+ * Debug launcher for Phlix Tizen App
  * Starts webpack dev server for local testing
  */
 

@@ -194,7 +194,7 @@ class SyncPlayService {
 
     /**
      * Initialize the SyncPlay service
-     * @param {string} baseUrl - Base URL of the Phlex server (e.g., http://localhost:8096)
+     * @param {string} baseUrl - Base URL of the Phlix server (e.g., http://localhost:8096)
      */
     init(baseUrl) {
         this.baseUrl = baseUrl.replace(/\/$/, '');
